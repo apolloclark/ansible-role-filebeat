@@ -1,0 +1,44 @@
+---
+# https://www.elastic.co/guide/en/beats/filebeat/current/setup-repositories.html
+
+# http://docs.ansible.com/ansible/latest/apt_key_module.html
+- name: Add repository key
+  apt_key:
+    url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
+    id: "46095ACC8548582C1A2699A9D27D666CD88E42B4"
+    state: present
+
+# http://docs.ansible.com/ansible/latest/apt_repository_module.html
+- name: Add Server repository
+  apt_repository:
+    repo: 'deb https://artifacts.elastic.co/packages/5.x/apt stable main'
+    state: present
+
+- name: Update apt cache
+  apt: update_cache=yes
+
+- name: Install filebeat, from repo (if choosing the latest)
+  apt:
+    name: filebeat
+    state: installed
+  when: "filebeat_version == 'latest'"
+  
+- name: Download filebeat deb
+  get_url:
+    url={{ elastic_url }}/downloads/beats/filebeat/filebeat-{{ filebeat_version }}-{{ platform }}.deb
+    dest=/opt/filebeat.deb
+  when: "filebeat_version != 'latest'"
+
+- name: Install filebeat, from deb (if choosing a specific version)
+  apt: deb=/opt/filebeat.deb
+  when: "filebeat_version != 'latest'"
+
+# http://docs.ansible.com/ansible/latest/template_module.html
+- name: Copy config file
+  template:
+    src: "filebeat.yml"
+    dest: "{{ filebeat_config_include_dir }}/filebeat.yml"
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart filebeat
