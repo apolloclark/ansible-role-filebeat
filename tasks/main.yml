@@ -22,7 +22,15 @@
     name: filebeat
     state: installed
   when: "filebeat_version == 'latest'"
-  
+
+- name: Get the platform (i386 or amd64) of the virtual machine
+  command: dpkg --print-architecture
+  register: print_architecture
+
+- name: And set the actual platform value as a variable
+  set_fact:
+    platform: "{{ print_architecture.stdout }}"
+
 - name: Download filebeat deb
   get_url:
     url={{ elastic_url }}/downloads/beats/filebeat/filebeat-{{ filebeat_version }}-{{ platform }}.deb
