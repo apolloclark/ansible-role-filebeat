@@ -4,13 +4,10 @@
 # https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration-details.html
 elastic_url: "https://artifacts.elastic.co"
 
-# Overload these variables using a dict named filebeat, ex:
-#
-# filebeat:
-#   version: 5.6.2
-#
+# Overload ariables using the dict named filebeat
 filebeat:
   version: "latest"
+
 filebeat_defaults:
   deamon: "filebeat"
   version: "latest"
