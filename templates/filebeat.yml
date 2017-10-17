@@ -8,28 +8,28 @@ filebeat:
   # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-global-options.html
 
   # Event count spool threshold - forces network flush if exceeded
-  spool_size: "{{ filebeat_global.spool_size }}"
+  spool_size: "{{ filebeat_combined.global.spool_size }}"
 
   # Enable async publisher pipeline in filebeat (Experimental!)
-  publish_async: "{{ filebeat_global.publish_async }}"
+  publish_async: "{{ filebeat_combined.global.publish_async }}"
 
   # Defines how often the spooler is flushed. After idle_timeout the spooler is
   # Flush even though spool_size is not reached.
-  idle_timeout: "{{ filebeat_global.idle_timeout }}"
+  idle_timeout: "{{ filebeat_combined.global.idle_timeout }}"
 
   # Name of the registry file. Per default it is put in the current working
   # directory. In case the working directory is changed after when running
   # filebeat again, indexing starts from the beginning again.
-  registry_file: "{{ filebeat_global.registry_file }}"
+  registry_file: "{{ filebeat_combined.global.registry_file }}"
 
   # Full Path to directory with additional prospector configuration files. Each file must end with .yml
   # These config files must have the full filebeat config part inside, but only
   # the prospector part is processed. All global options like spool_size are ignored.
   # The config_dir MUST point to a different directory then where the main filebeat config file is in.
-  config_dir: "{{ filebeat_global.config_dir }}"
+  config_dir: "{{ filebeat_combined.global.config_dir }}"
 
   # How long Filebeat waits on shutdown for the publisher to finish sending events before Filebeat shuts down.
-  shutdown_timeout: {{ filebeat_global.shutdown_timeout }}
+  shutdown_timeout: {{ filebeat_combined.global.shutdown_timeout }}
 
   #
   # List of prospectors to fetch data.
@@ -37,7 +37,7 @@ filebeat:
   # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-filebeat-options.html
   prospectors:
     # Each - is a prospector. Below are the prospector specific configurations
-{% for prospector in filebeat_prospectors %}
+{% for prospector in filebeat_combined.prospectors %}
     -
       # Paths that should be crawled and fetched. Glob based paths.
       # To fetch all ".log" files from a specific level of subdirectories
@@ -217,28 +217,28 @@ filebeat:
 output:
 
   ### Logstash as output
-{% if 'logstash' in filebeat_output %}
+{% if 'logstash' in filebeat_combined.output %}
   logstash:
     # The Logstash hosts
-    hosts: {{ filebeat_output.logstash.hosts }}
+    hosts: {{ filebeat_combined.output.logstash.hosts }}
 
     # Number of workers per Logstash host.
-    worker: "{{ filebeat_output.logstash.worker }}"
+    worker: "{{ filebeat_combined.output.logstash.worker }}"
 
     # The maximum number of events to bulk into a single batch window. The
     # default is 2048.
-    bulk_max_size: "{{ filebeat_output.logstash.bulk_max_size }}"
+    bulk_max_size: "{{ filebeat_combined.output.logstash.bulk_max_size }}"
 
     # Set gzip compression level.
-    compression_level: "{{ filebeat_output.logstash.compression_level }}"
+    compression_level: "{{ filebeat_combined.output.logstash.compression_level }}"
 
     # Optional load balance the events between the Logstash hosts
-    loadbalance: "{{ filebeat_output.logstash.loadbalance }}"
+    loadbalance: "{{ filebeat_combined.output.logstash.loadbalance }}"
 
     # Optional index name. The default index name depends on the each beat.
     # For Packetbeat, the default is set to packetbeat, for Topbeat
     # top topbeat and for Filebeat to filebeat.
-    index: "{{ filebeat_output.logstash.index }}"
+    index: "{{ filebeat_combined.output.logstash.index }}"
 
     # Optional TLS. By default is off.
     #tls:
@@ -264,31 +264,31 @@ output:
       #curve_types: []
 {% endif %}
 
-{% if 'file' in filebeat_output %}
+{% if 'file' in filebeat_combined.output %}
   ### File as output
   file:
     # Path to the directory where to save the generated files. The option is mandatory.
-    path: "{{ filebeat_output.file.path }}"
+    path: "{{ filebeat_combined.output.file.path }}"
 
     # Name of the generated files. The default is `filebeat` and it generates files: `filebeat`, `filebeat.1`, `filebeat.2`, etc.
-    filename: "{{ filebeat_output.file.filename }}"
+    filename: "{{ filebeat_combined.output.file.filename }}"
 
     # Maximum size in kilobytes of each file. When this size is reached, the files are
     # rotated. The default value is 10 MB.
-    rotate_every_kb: "{{ filebeat_output.file.rotate_every_kb }}"
+    rotate_every_kb: "{{ filebeat_combined.output.file.rotate_every_kb }}"
 
     # Maximum number of files under path. When this number of files is reached, the
     # oldest file is deleted and the rest are shifted from last to first. The default
     # is 7 files.
-    number_of_files: "{{ filebeat_output.file.number_of_files }}"
+    number_of_files: "{{ filebeat_combined.output.file.number_of_files }}"
 {% endif %}
 
 
   ### Console output
-{% if 'console' in filebeat_output %}
+{% if 'console' in filebeat_combined.output %}
   console:
     # Pretty print json event
-    pretty: "{{ filebeat_output.console.pretty }}"
+    pretty: "{{ filebeat_combined.output.console.pretty }}"
 {% endif %}
 
 
@@ -339,27 +339,27 @@ logging:
 
   # Send all logging output to syslog. On Windows default is false, otherwise
   # default is true.
-  to_syslog: "{{ filebeat_logging.to_syslog }}"
+  to_syslog: "{{ filebeat_combined.logging.to_syslog }}"
 
   # Write all logging output to files. Beats automatically rotate files if rotateeverybytes
   # limit is reached.
-  to_files: "{{ filebeat_logging.to_files }}"
+  to_files: "{{ filebeat_combined.logging.to_files }}"
 
   # To enable logging to files, to_files option has to be set to true
-{% if 'files' in filebeat_logging %}
+{% if 'files' in filebeat_combined.logging %}
   files:
     # The directory where the log files will written to.
-    path: "{{ filebeat_logging.files.path }}"
+    path: "{{ filebeat_combined.logging.files.path }}"
 
     # The name of the files where the logs are written to.
-    name: "{{ filebeat_logging.files.name }}"
+    name: "{{ filebeat_combined.logging.files.name }}"
 
     # Configure log file size limit. If limit is reached, log file will be
     # automatically rotated
-    rotateeverybytes: "{{ filebeat_logging.files.rotateeverybytes }}"
+    rotateeverybytes: "{{ filebeat_combined.logging.files.rotateeverybytes }}"
 
     # Number of rotated log files to keep. Oldest files will be deleted first.
-    keepfiles: "{{ filebeat_logging.files.keepfiles }}"
+    keepfiles: "{{ filebeat_combined.logging.files.keepfiles }}"
 {% endif %}
 
   # Enable debug output for selected components. To enable all selectors use ["*"]
@@ -369,6 +369,6 @@ logging:
 
   # Sets log level. The default log level is error.
   # Available log levels are: critical, error, warning, info, debug
-  level: "{{ filebeat_logging.level }}"
+  level: "{{ filebeat_combined.logging.level }}"
 
 

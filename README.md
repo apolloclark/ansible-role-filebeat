@@ -7,6 +7,14 @@ Ansible Role to install and configure Elastic filebeat for Ubuntu.
 
 None.
 
+## Role Variables
+
+Available variables are listed below, along with default values (see `defaults/main.yml`).
+You can overload the variables by creating a dictionary called "filebeat", ex:
+
+    filebeat:
+      version: 5.6.2
+
 ## Dependencies
 
 None.

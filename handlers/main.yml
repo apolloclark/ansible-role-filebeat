@@ -1,6 +1,6 @@
 ---
 - name: restart filebeat
   service:
-    name: "{{ filebeat_deamon }}"
+    name: "{{ filebeat_combined.deamon }}"
     state: restarted
     sleep: 5
