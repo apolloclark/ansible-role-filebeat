@@ -58,8 +58,8 @@ filebeat_defaults:
       input_type: "log"
       document_type: "misc_log"
 
-  # https://www.elastic.co/guide/en/beats/filebeat/current/config-filebeat-logstash.html
   output:
+    # https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html
     logstash:
       hosts: '["localhost:5044"]'
       worker: 1
@@ -67,6 +67,7 @@ filebeat_defaults:
       compression_level: 3
       loadbalance: true
       index: filebeat
+    # https://www.elastic.co/guide/en/beats/filebeat/current/file-output.html
     file:
       path: "/tmp/filebeat"
       filename: filebeat
