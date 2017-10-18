@@ -18,6 +18,8 @@ galaxy_info:
     - monitoring
     - metrics
     - logging
+    - security
+    - devopssec
     - elastic
     - elk
     - filebeat
