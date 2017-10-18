@@ -311,22 +311,22 @@ output:
 {% if 'logging' in filebeat_combined %}
 logging:
 
+  # Sets log level. The default log level is error.
+  # Available log levels are: critical, error, warning, info, debug
+  level: {{ filebeat_combined.logging.level }}
+
   # Enable debug output for selected components. To enable all selectors use ["*"]
   # Other available selectors are beat, publish, service
   # Multiple selectors can be chained.
-  selectors: "{{ filebeat_combined.logging.selectors }}"
-
-  # Sets log level. The default log level is error.
-  # Available log levels are: critical, error, warning, info, debug
-  level: "{{ filebeat_combined.logging.level }}"
+  selectors: {{ filebeat_combined.logging.selectors }}
 
   # Send all logging output to syslog. On Windows default is false, otherwise
   # default is true.
-  to_syslog: "{{ filebeat_combined.logging.to_syslog }}"
+  to_syslog: {{ filebeat_combined.logging.to_syslog }}
 
   # Write all logging output to files. Beats automatically rotate files if rotateeverybytes
   # limit is reached.
-  to_files: "{{ filebeat_combined.logging.to_files }}"
+  to_files: {{ filebeat_combined.logging.to_files }}
 
   # To enable logging to files, to_files option has to be set to true
 {% if 'files' in filebeat_combined.logging %}
@@ -339,9 +339,16 @@ logging:
 
     # Configure log file size limit. If limit is reached, log file will be
     # automatically rotated
-    rotateeverybytes: "{{ filebeat_combined.logging.files.rotateeverybytes }}"
+    rotateeverybytes: {{ filebeat_combined.logging.files.rotateeverybytes }}
 
     # Number of rotated log files to keep. Oldest files will be deleted first.
-    keepfiles: "{{ filebeat_combined.logging.files.keepfiles }}"
+    keepfiles: {{ filebeat_combined.logging.files.keepfiles }}
+{% endif %}
+
+  # Enable metrics recording
+{% if 'metrics' in filebeat_combined.logging %}
+  metrics:
+    enabled: {{ filebeat_combined.logging.metrics.enabled }}
+    period: {{ filebeat_combined.logging.metrics.period }}
 {% endif %}
 {% endif %}
