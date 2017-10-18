@@ -65,24 +65,25 @@ filebeat_defaults:
       worker: 1
       bulk_max_size: 1024
       compression_level: 3
-      loadbalance: true
-      index: filebeat
+      loadbalance: "true"
+      index: "filebeat"
     # https://www.elastic.co/guide/en/beats/filebeat/current/file-output.html
     file:
       path: "/tmp/filebeat"
-      filename: filebeat
+      filename: "filebeat"
       rotate_every_kb: 10240
       number_of_files: 7
     console:
-      pretty: false
+      pretty: "false"
 
   # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-logging.html
   logging:
-    to_syslog: false
-    to_files: true
+    level: "info"
+    selectors: '["*"]'
+    to_syslog: "false"
+    to_files: "true"
     files:
-      path: /var/log/filebeat/
-      name: filebeat.log
+      path: "/var/log/filebeat/"
+      name: "filebeat.log"
       rotateeverybytes: 10485760 # = 10MB
       keepfiles: 7
-    level: info

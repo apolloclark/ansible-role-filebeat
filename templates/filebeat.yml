@@ -1,11 +1,12 @@
 ################### Filebeat Configuration Example #########################
 
 ############################# Filebeat ######################################
+#
+# Glolbal filebeat configuration options
+#
+# https://www.elastic.co/guide/en/beats/filebeat/current/configuration-global-options.html
+#
 filebeat:
-  #
-  # Glolbal filebeat configuration options
-  #
-  # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-global-options.html
 
   # Event count spool threshold - forces network flush if exceeded
   spool_size: "{{ filebeat_combined.global.spool_size }}"
@@ -206,18 +207,19 @@ filebeat:
 {% endif %}
 {% endfor %}
 
-###############################################################################
-############################# Libbeat Config ##################################
-# Base config file used by all other beats for using libbeat features
+
+
+
 
 ############################# Output ##########################################
-
+#
 # Configure what outputs to use when sending the data collected by the beat.
 # Multiple outputs may be used.
+#
 output:
 
-  ### Logstash as output
 {% if 'logstash' in filebeat_combined.output %}
+  # https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html
   logstash:
     # The Logstash hosts
     hosts: {{ filebeat_combined.output.logstash.hosts }}
@@ -264,8 +266,10 @@ output:
       #curve_types: []
 {% endif %}
 
+
+
 {% if 'file' in filebeat_combined.output %}
-  ### File as output
+  # https://www.elastic.co/guide/en/beats/filebeat/current/file-output.html
   file:
     # Path to the directory where to save the generated files. The option is mandatory.
     path: "{{ filebeat_combined.output.file.path }}"
@@ -284,58 +288,37 @@ output:
 {% endif %}
 
 
-  ### Console output
+
 {% if 'console' in filebeat_combined.output %}
+  # https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html
   console:
     # Pretty print json event
     pretty: "{{ filebeat_combined.output.console.pretty }}"
 {% endif %}
 
 
-############################# Shipper #########################################
 
-shipper:
-  # The name of the shipper that publishes the network data. It can be used to group
-  # all the transactions sent by a single shipper in the web interface.
-  # If this options is not defined, the hostname is used.
-  #name:
-
-  # The tags of the shipper are included in their own field with each
-  # transaction published. Tags make it easy to group servers by different
-  # logical properties.
-  #tags: ["service-X", "web-tier"]
-
-  # Uncomment the following if you want to ignore transactions created
-  # by the server on which the shipper is installed. This option is useful
-  # to remove duplicates if shippers are installed on multiple servers.
-  #ignore_outgoing: true
-
-  # How often (in seconds) shippers are publishing their IPs to the topology map.
-  # The default is 10 seconds.
-  #refresh_topology_freq: 10
-
-  # Expiration time (in seconds) of the IPs published by a shipper to the topology map.
-  # All the IPs will be deleted afterwards. Note, that the value must be higher than
-  # refresh_topology_freq. The default is 15 seconds.
-  #topology_expire: 15
-
-  # Internal queue size for single events in processing pipeline
-  #queue_size: 1000
-
-  # Configure local GeoIP database support.
-  # If no paths are not configured geoip is disabled.
-  #geoip:
-    #paths:
-    #  - "/usr/share/GeoIP/GeoLiteCity.dat"
-    #  - "/usr/local/var/GeoIP/GeoLiteCity.dat"
 
 
 ############################# Logging #########################################
+#
+# https://www.elastic.co/guide/en/beats/filebeat/current/configuration-logging.html
+#
 
 # There are three options for the log ouput: syslog, file, stderr.
 # Under Windos systems, the log files are per default sent to the file output,
 # under all other system per default to syslog.
+{% if 'logging' in filebeat_combined %}
 logging:
+
+  # Enable debug output for selected components. To enable all selectors use ["*"]
+  # Other available selectors are beat, publish, service
+  # Multiple selectors can be chained.
+  selectors: "{{ filebeat_combined.logging.selectors }}"
+
+  # Sets log level. The default log level is error.
+  # Available log levels are: critical, error, warning, info, debug
+  level: "{{ filebeat_combined.logging.level }}"
 
   # Send all logging output to syslog. On Windows default is false, otherwise
   # default is true.
@@ -361,14 +344,4 @@ logging:
     # Number of rotated log files to keep. Oldest files will be deleted first.
     keepfiles: "{{ filebeat_combined.logging.files.keepfiles }}"
 {% endif %}
-
-  # Enable debug output for selected components. To enable all selectors use ["*"]
-  # Other available selectors are beat, publish, service
-  # Multiple selectors can be chained.
-  #selectors: [ ]
-
-  # Sets log level. The default log level is error.
-  # Available log levels are: critical, error, warning, info, debug
-  level: "{{ filebeat_combined.logging.level }}"
-
-
+{% endif %}
