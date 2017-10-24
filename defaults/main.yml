@@ -9,7 +9,7 @@ filebeat:
   version: "latest"
 
 filebeat_defaults:
-  deamon: "filebeat"
+  daemon: "filebeat"
   version: "latest"
   config_include_dir: "/etc/filebeat/"
 

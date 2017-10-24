@@ -3,7 +3,7 @@ dependencies: []
 
 galaxy_info:
   author: apolloclark
-  description: Install and configure filebeat
+  description: Install and configure Elastic Filebeat
   company: "Apollo Clark"
   license: "license (BSD, MIT)"
   min_ansible_version: 2.2
