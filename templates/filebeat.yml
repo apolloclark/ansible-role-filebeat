@@ -230,9 +230,223 @@ filebeat:
 #
 output:
 
+{% if 'elasticsearch' in filebeat_combined.output %}
+  #
+  #------------------------- Elasticsearch output -----------------------------
+  #
+  # https://www.elastic.co/guide/en/beats/filebeat/current/elasticsearch-output.html
+  elasticsearch:
+
+{% if 'enabled' in filebeat_combined.output.elasticsearch %}
+    # The enabled config is a boolean setting to enable or disable the output.
+    # If set to false, the output is disabled.
+    # 
+    # The default value is true.
+    enabled: "{{ filebeat_combined.output.elasticsearch.enabled }}"
+{% endif %}
+
+{% if 'hosts' in filebeat_combined.output.elasticsearch %}
+    # The list of Elasticsearch nodes to connect to. The events are distributed
+    # to these nodes in round robin order. If one node becomes unreachable, the
+    # event is automatically sent to another node. Each Elasticsearch node can
+    # be defined as a URL or IP:PORT. For example: http://192.15.3.2,
+    # https://es.found.io:9230 or 192.24.3.2:9300. If no port is specified,
+    # 9200 is used.
+    hosts: {{ filebeat_combined.output.elasticsearch.hosts }}
+{% endif %}
+
+{% if 'compression_level' in filebeat_combined.output.elasticsearch %}
+    # The gzip compression level. Setting this value to 0 disables compression.
+    # The compression level must be in the range of 1 (best speed) to 9 (best
+    # compression).
+    # 
+    # Increasing the compression level will reduce the network usage but will
+    # increase the cpu usage.
+    # 
+    # The default value is 0.
+    compression_level: {{ filebeat_combined.output.elasticsearch.compression_level }}
+{% endif %}
+
+{% if 'worker' in filebeat_combined.output.elasticsearch %}
+    # The number of workers per configured host publishing events to
+    # Elasticsearch. This is best used with load balancing mode enabled.
+    # Example: If you have 2 hosts and 3 workers, in total 6 workers are
+    # started (3 for each host).
+    worker: {{ filebeat_combined.output.elasticsearch.worker }}
+{% endif %}
+
+{% if 'username' in filebeat_combined.output.elasticsearch %}
+    # The basic authentication username for connecting to Elasticsearch.
+    username: "{{ filebeat_combined.output.elasticsearch.username }}"
+{% endif %}
+
+{% if 'password' in filebeat_combined.output.elasticsearch %}
+    # The basic authentication password for connecting to Elasticsearch.
+    password: "{{ filebeat_combined.output.elasticsearch.password }}"
+{% endif %}
+
+{% if 'parameters' in filebeat_combined.output.elasticsearch %}
+    # Dictionary of HTTP parameters to pass within the url with index operations.
+    parameters: {{ filebeat_combined.output.elasticsearch.parameters }}
+{% endif %}
+
+{% if 'protocol' in filebeat_combined.output.elasticsearch %}
+    # The name of the protocol Elasticsearch is reachable on. The options
+    # are: http or https. The default is http. However, if you specify a URL
+    # for hosts, the value of protocol is overridden by whatever scheme you
+    # specify in the URL.
+    protocol: "{{ filebeat_combined.output.elasticsearch.protocol }}"
+{% endif %}
+
+{% if 'path' in filebeat_combined.output.elasticsearch %}
+    # An HTTP path prefix that is prepended to the HTTP API calls. This is
+    # useful for the cases where Elasticsearch listens behind an HTTP reverse
+    # proxy that exports the API under a custom prefix.
+    path: "{{ filebeat_combined.output.elasticsearch.path }}"
+{% endif %}
+
+{% if 'headers' in filebeat_combined.output.elasticsearch %}
+    # Custom HTTP headers to add to each request created by the Elasticsearch
+    # output. It is generally possible to specify multiple header values
+    # for the same header name by separating them with a comma.
+    headers: {{ filebeat_combined.output.elasticsearch.headers }}
+{% endif %}
+
+{% if 'proxy_url' in filebeat_combined.output.elasticsearch %}
+    # The URL of the proxy to use when connecting to the Elasticsearch servers.
+    # The value may be either a complete URL or a "host[:port]", in which case
+    # the "http" scheme is assumed. If a value is not specified through the
+    # configuration file then proxy environment variables are used. See the
+    # golang documentation for more information about the environment variables.
+    proxy_url: "{{ filebeat_combined.output.elasticsearch.proxy_url }}"
+{% endif %}
+
+{% if 'index' in filebeat_combined.output.elasticsearch %}
+    # The index name to write events to. The default is "filebeat-%{+yyyy.MM.dd}"
+    # (for example, "filebeat-2015.04.26").
+    index: "{{ filebeat_combined.output.elasticsearch.index }}"
+{% endif %}
+
+{% if 'indices' in filebeat_combined.output.elasticsearch %}
+    # Array of index selector rules supporting conditionals, format string based
+    # field access and name mappings. The first rule matching will be used
+    # to set the index for the event to be published. If indices is missing
+    # or no rule matches, the index field will be used.
+    indices: {{ filebeat_combined.output.elasticsearch.indices }}
+{% endif %}
+
+{% if 'pipeline' in filebeat_combined.output.elasticsearch %}
+    # A format string value that specifies the ingest node pipeline to write events to.
+    pipeline: "{{ filebeat_combined.output.elasticsearch.pipeline }}"
+{% endif %}
+
+{% if 'pipelines' in filebeat_combined.output.elasticsearch %}
+    # Similar to the indices array, this is an array of pipeline selector
+    # configurations supporting conditionals, format string based field access
+    # and name mappings. The first rule matching will be used to set the
+    # pipeline for the event to be published. If pipelines is missing or no
+    # rule matches, the pipeline field will be used.
+    pipelines: {{ filebeat_combined.output.elasticsearch.pipelines }}
+{% endif %}
+
+{% if 'template' in filebeat_combined.output.elasticsearch %}
+    # The index template to use for setting mappings in Elasticsearch. By
+    # default, template loading is enabled.
+    template:
+
+{% if 'enabled' in filebeat_combined.output.elasticsearch.template %}
+      # Set to false to disable template loading. If set this to false, you
+      # must load the template manually.s
+      enabled: "{{ filebeat_combined.output.elasticsearch.template.enabled }}"
+{% endif %}
+
+{% if 'name' in filebeat_combined.output.elasticsearch.template %}
+      # The name of the template. The default is filebeat.
+      name: "{{ filebeat_combined.output.elasticsearch.template.name }}"
+{% endif %}
+
+{% if 'path' in filebeat_combined.output.elasticsearch.template %}
+      # The path to the template file. The default is filebeat.template.json.
+      # If a relative path is set, it is considered relative to the config
+      # path. See the Directory Layout section for details.
+      path: "{{ filebeat_combined.output.elasticsearch.template.path }}"
+{% endif %}
+
+{% if 'overwrite' in filebeat_combined.output.elasticsearch.template %}
+      # A boolean that specifies whether to overwrite the existing template.
+      # The default is false.
+      overwrite: "{{ filebeat_combined.output.elasticsearch.template.overwrite }}"
+{% endif %}
+{% endif %}
+
+{% if 'max_retries' in filebeat_combined.output.elasticsearch %}
+    # The number of times to retry publishing an event after a publishing
+    # failure. After the specified number of retries, the events are typically
+    # dropped. Some Beats, such as Filebeat, ignore the max_retries setting
+    # and retry until all events are published.
+    # 
+    # Set max_retries to a value less than 0 to retry until all events are
+    # published.
+    # 
+    # The default is 3.
+    max_retries: {{ filebeat_combined.output.elasticsearch.max_retries }}
+{% endif %}
+
+{% if 'bulk_max_size' in filebeat_combined.output.elasticsearch %}
+    # The maximum number of events to bulk in a single Elasticsearch bulk API
+    # index request. The default is 50.
+    # 
+    # If the Beat sends single events, the events are collected into batches.
+    # If the Beat publishes a large batch of events (larger than the value
+    # specified by bulk_max_size), the batch is split.
+    # 
+    # Specifying a larger batch size can improve performance by lowering the
+    # overhead of sending events. However big batch sizes can also increase
+    # processing times, which might result in API errors, killed connections,
+    # timed-out publishing requests, and, ultimately, lower throughput.
+    # 
+    # Setting bulk_max_size to values less than or equal to 0 disables buffering
+    # in libbeat. When buffering is disabled, Beats that publish single events
+    # (such as Packetbeat) send each event directly to Elasticsearch. Beats
+    # that publish data in batches (such as Filebeat) send events in batches
+    # based on the spooler size.
+    bulk_max_size: {{ filebeat_combined.output.elasticsearch.bulk_max_size }}
+{% endif %}
+
+{% if 'timeout' in filebeat_combined.output.elasticsearch %}
+    # The http request timeout in seconds for the Elasticsearch request.
+    # The default is 90.
+    timeout: {{ filebeat_combined.output.elasticsearch.timeout }}
+{% endif %}
+
+{% if 'flush_interval' in filebeat_combined.output.elasticsearch %}
+    # The number of seconds to wait for new events between two bulk API index
+    # requests. If bulk_max_size is reached before this interval expires,
+    # additional bulk index requests are made.
+    flush_interval: {{ filebeat_combined.output.elasticsearch.flush_interval }}
+{% endif %}
+
+{% if 'ssl' in filebeat_combined.output.elasticsearch %}
+    # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-output-ssl.html
+    # ssl:
+      # certificate_authorities: ["/etc/pki/root/ca.pem"]
+      # certificate: "/etc/pki/client/cert.pem"
+      # key: "/etc/pki/client/cert.key"
+{% endif %}
+
+{% endif %}
+
+
+
 {% if 'logstash' in filebeat_combined.output %}
+  #
+  #------------------------- Logstash output -----------------------------
+  #
   # https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html
   logstash:
+
+    # Enable this?
+    enabled: {{ filebeat_combined.output.logstash.enabled }}
 
     # The Logstash hosts
     hosts: {{ filebeat_combined.output.logstash.hosts }}
@@ -294,8 +508,14 @@ output:
 
 
 {% if 'file' in filebeat_combined.output %}
+  #
+  #------------------------- File output -----------------------------
+  #
   # https://www.elastic.co/guide/en/beats/filebeat/current/file-output.html
   file:
+    # Enabled this?
+    enabled: "{{ filebeat_combined.output.file.enabled }}"
+    
     # Path to the directory where to save the generated files. The option is mandatory.
     path: "{{ filebeat_combined.output.file.path }}"
 
@@ -321,8 +541,14 @@ output:
 
 
 {% if 'console' in filebeat_combined.output %}
+  #
+  #------------------------- Console output -----------------------------
+  #
   # https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html
   console:
+    # Enable this?
+    enabled: "{{ filebeat_combined.output.console.enabled }}"
+
     # Pretty print json event
     pretty: "{{ filebeat_combined.output.console.pretty }}"
 {% endif %}

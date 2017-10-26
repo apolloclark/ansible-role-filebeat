@@ -59,22 +59,68 @@ filebeat_defaults:
       document_type: "misc_log"
 
   output:
+
+    # https://www.elastic.co/guide/en/beats/filebeat/current/elasticsearch-output.html
+    elasticsearch:
+      enabled: "true"
+      hosts: '["http://localhost:9200"]'
+      compression_level: 0
+      worker: 3
+      username: ""
+      password: ""
+      parameters: {}
+      protocol: "http"
+      path: ""
+      headers: {}
+      proxy_url: ""
+      index: 'filebeat-%{+yyyy.MM.dd}'
+      indices: {}
+      pipeline: ""
+      pipelines: {}
+      template:
+        enabled: "true"
+        name: "filebeat"
+        path: "filebeat.template.json"
+        overwrite: "false"
+        version:
+          2x:
+            enabled: "false"
+            path: "filebeat.template-es2x.json"
+          6x:
+            enabled: "false"
+            path: "filebeat.template-es6x.json"
+      max_retries: 3
+      bulk_max_size: 50
+      timeout: 90
+      flush_interval: ""
+      # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-output-ssl.html
+      # ssl:
+        # certificate_authorities: ["/etc/pki/root/ca.pem"]
+        # certificate: "/etc/pki/client/cert.pem"
+        # key: "/etc/pki/client/cert.key"
+
     # https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html
     logstash:
+      enabled: "false"
       hosts: '["localhost:5044"]'
       worker: 1
       bulk_max_size: 1024
       compression_level: 3
       loadbalance: "true"
       index: "filebeat"
+
     # https://www.elastic.co/guide/en/beats/filebeat/current/file-output.html
-    # file:
-      # path: "/tmp/filebeat"
-      # filename: "filebeat"
-      # rotate_every_kb: 10240
-      # number_of_files: 7
-    # console:
-      # pretty: "false"
+    file:
+      enabled: "false"
+      path: "/tmp/filebeat"
+      filename: "filebeat"
+      rotate_every_kb: 10240
+      number_of_files: 7
+
+    # https://www.elastic.co/guide/en/beats/heartbeat/current/console-output.html
+    console:
+      enabled: "false"
+      pretty: "false"
 
   # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-logging.html
   logging:
