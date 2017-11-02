@@ -135,7 +135,7 @@ filebeat_defaults:
       rotate_every_kb: 10240
       number_of_files: 7
 
-    # https://www.elastic.co/guide/en/beats/heartbeat/current/console-output.html
+    # https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html
     console:
       enabled: "false"
       pretty: "false"
