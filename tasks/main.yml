@@ -23,7 +23,7 @@
   apt: update_cache=yes
   when: "filebeat_combined.version == '5.x'"
 
-- name: Install filebeat, from repo (if choosing the latest)
+- name: Install from repo (if choosing the 5.x version)
   apt:
     name: filebeat
     state: installed
@@ -37,13 +37,13 @@
   set_fact:
     platform: "{{ print_architecture.stdout }}"
 
-- name: Download filebeat deb
+- name: Download deb (if choosing a specific version)
   get_url:
     url={{ elastic_url }}/downloads/beats/filebeat/filebeat-{{ filebeat_combined.version }}-{{ platform }}.deb
     dest=/opt/filebeat.deb
   when: "filebeat_combined.version != '5.x'"
 
-- name: Install filebeat, from deb (if choosing a specific version)
+- name: Install from deb (if choosing a specific version)
   apt: deb=/opt/filebeat.deb
   when: "filebeat_combined.version != '5.x'"
 
