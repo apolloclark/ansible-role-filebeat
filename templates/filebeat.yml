@@ -49,8 +49,8 @@ filebeat:
   #
   # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-filebeat-options.html
   prospectors:
-{% for prospector in filebeat_combined.prospectors %}
     # Each - is a prospector. Below are the prospector specific configurations
+{% for prospector in filebeat_combined.prospectors %}
     -
       # Paths that should be crawled and fetched. Glob based paths.
       # To fetch all ".log" files from a specific level of subdirectories
@@ -99,11 +99,13 @@ filebeat:
       exclude_files: "{{ prospector.exclude_files }}"
 {% endif %}
 
+{% if 'fields' in prospector %}
       # Optional additional fields. These field can be freely picked
       # to add additional information to the crawled log files for filtering
       #fields:
       #  level: debug
       #  review: 1
+{% endif %}
 
 {% if 'fields_under_root' in prospector %}
       # Set to true to store the additional fields as top level fields instead
@@ -151,6 +153,7 @@ filebeat:
       max_bytes: {{ prospector.max_bytes }}
 {% endif %}
 
+{% if 'multiline' in prospector %}
       # Mutiline can be used for log messages spanning multiple lines. This is common
       # for Java Stack Traces or C-Line Continuation
       #multiline:
@@ -174,6 +177,7 @@ filebeat:
         # After the defined timeout, an multiline event is sent even if no new pattern was found to start a new event
         # Default is 5s.
         #timeout: 5s
+{% endif %}
 
 {% if 'tail_files' in prospector %}
       # Setting tail_files to true means filebeat starts readding new files at the end
@@ -230,6 +234,8 @@ filebeat:
 #
 output:
 
+
+
 {% if 'elasticsearch' in filebeat_combined.output %}
   #
   #------------------------- Elasticsearch output -----------------------------
@@ -240,7 +246,7 @@ output:
 {% if 'enabled' in filebeat_combined.output.elasticsearch %}
     # The enabled config is a boolean setting to enable or disable the output.
     # If set to false, the output is disabled.
-    # 
+    #
     # The default value is true.
     enabled: "{{ filebeat_combined.output.elasticsearch.enabled }}"
 {% endif %}
@@ -259,10 +265,10 @@ output:
     # The gzip compression level. Setting this value to 0 disables compression.
     # The compression level must be in the range of 1 (best speed) to 9 (best
     # compression).
-    # 
+    #
     # Increasing the compression level will reduce the network usage but will
     # increase the cpu usage.
-    # 
+    #
     # The default value is 0.
     compression_level: {{ filebeat_combined.output.elasticsearch.compression_level }}
 {% endif %}
@@ -384,10 +390,10 @@ output:
     # failure. After the specified number of retries, the events are typically
     # dropped. Some Beats, such as Filebeat, ignore the max_retries setting
     # and retry until all events are published.
-    # 
+    #
     # Set max_retries to a value less than 0 to retry until all events are
     # published.
-    # 
+    #
     # The default is 3.
     max_retries: {{ filebeat_combined.output.elasticsearch.max_retries }}
 {% endif %}
@@ -395,16 +401,16 @@ output:
 {% if 'bulk_max_size' in filebeat_combined.output.elasticsearch %}
     # The maximum number of events to bulk in a single Elasticsearch bulk API
     # index request. The default is 50.
-    # 
+    #
     # If the Beat sends single events, the events are collected into batches.
     # If the Beat publishes a large batch of events (larger than the value
     # specified by bulk_max_size), the batch is split.
-    # 
+    #
     # Specifying a larger batch size can improve performance by lowering the
     # overhead of sending events. However big batch sizes can also increase
     # processing times, which might result in API errors, killed connections,
     # timed-out publishing requests, and, ultimately, lower throughput.
-    # 
+    #
     # Setting bulk_max_size to values less than or equal to 0 disables buffering
     # in libbeat. When buffering is disabled, Beats that publish single events
     # (such as Packetbeat) send each event directly to Elasticsearch. Beats
@@ -445,31 +451,84 @@ output:
   # https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html
   logstash:
 
-    # Enable this?
-    enabled: {{ filebeat_combined.output.logstash.enabled }}
+{% if 'enabled' in filebeat_combined.output.logstash %}
+    # The enabled config is a boolean setting to enable or disable the output.
+    # If set to false, the output is disabled.
+    #
+    # The default value is true.
+    enabled: "{{ filebeat_combined.output.logstash.enabled }}"
+{% endif %}
 
-    # The Logstash hosts
+    # The list of known Logstash servers to connect to. If load balancing is
+    # disabled, but mutliple hosts are configured, one host is selected randomly
+    # (there is no precedence). If one host becomes unreachable, another one
+    # is selected randomly.
+    #
+    # All entries in this list can contain a port number. If no port number is
+    # given, the value specified for port is used as the default port number.
     hosts: {{ filebeat_combined.output.logstash.hosts }}
 
-{% if 'worker' in filebeat_combined.output.logstash %}
-    # Number of workers per Logstash host.
-    worker: "{{ filebeat_combined.output.logstash.worker }}"
-{% endif %}
-
-{% if 'bulk_max_size' in filebeat_combined.output.logstash %}
-    # The maximum number of events to bulk into a single batch window. The
-    # default is 2048.
-    bulk_max_size: {{ filebeat_combined.output.logstash.bulk_max_size }}
-{% endif %}
-
 {% if 'compression_level' in filebeat_combined.output.logstash %}
-    # Set gzip compression level.
+    # The gzip compression level. Setting this value to 0 disables compression.
+    # The compression level must be in the range of 1 (best speed) to 9 (best
+    # compression).
+    #
+    # Increasing the compression level will reduce the network usage but will
+    # increase the cpu usage.
+    #
+    # The default value is 3.
     compression_level: {{ filebeat_combined.output.logstash.compression_level }}
 {% endif %}
 
+{% if 'worker' in filebeat_combined.output.logstash %}
+    # The number of workers per configured host publishing events to Logstash.
+    # This is best used with load balancing mode enabled. Example: If you have
+    # 2 hosts and 3 workers, in total 6 workers are started (3 for each host).
+    worker: {{ filebeat_combined.output.logstash.worker }}
+{% endif %}
+
 {% if 'loadbalance' in filebeat_combined.output.logstash %}
-    # Optional load balance the events between the Logstash hosts
+    # If set to true and multiple Logstash hosts are configured, the output
+    # plugin load balances published events onto all Logstash hosts. If set to
+    # false, the output plugin sends all events to only one host (determined
+    # at random) and will switch to another host if the selected one becomes
+    # unresponsive.
+    #
+    # The default value is false.
     loadbalance: "{{ filebeat_combined.output.logstash.loadbalance }}"
+{% endif %}
+
+{% if 'pipelining' in filebeat_combined.output.logstash %}
+    # Configures number of batches to be send asynchronously to logstash while
+    # waiting for ACK from logstash. Output only becomes blocking once number
+    # of pipelining batches have been written. Pipelining is disabled if a
+    # values of 0 is configured.
+    #
+    # The default value is 0.
+    pipelining: {{ filebeat_combined.output.logstash.pipelining }}
+{% endif %}
+
+{% if 'proxy_url' in filebeat_combined.output.logstash %}
+    # The URL of the SOCKS5 proxy to use when connecting to the Logstash servers.
+    # The value must be a URL with a scheme of socks5://. The protocol used
+    # to communicate to Logstash is not based on HTTP so a web-proxy cannot
+    # be used.
+    #
+    # If the SOCKS5 proxy server requires client authentication, then a
+    # username and password can be embedded in the URL as shown in the example.
+    #
+    # When using a proxy, hostnames are resolved on the proxy server instead of
+    # on the client. You can change this behavior by setting the
+    # proxy_use_local_resolver option.
+    proxy_url: "{{ filebeat_combined.output.logstash.proxy_url }}"
+{% endif %}
+
+{% if 'proxy_use_local_resolver' in filebeat_combined.output.logstash %}
+    # The proxy_use_local_resolver option determines if Logstash hostnames are
+    # resolved locally when using a proxy. The default value is false which
+    # means that when a proxy is used the name resolution occurs on the proxy
+    # server.
+    proxy_use_local_resolver: "{{ filebeat_combined.output.logstash.proxy_use_local_resolver }}"
 {% endif %}
 
 {% if 'index' in filebeat_combined.output.logstash %}
@@ -479,30 +538,66 @@ output:
     index: "{{ filebeat_combined.output.logstash.index }}"
 {% endif %}
 
-{% if 'tls' in filebeat_combined.output.logstash %}
-    # Optional TLS. By default is off.
-    #tls:
-      # List of root certificates for HTTPS server verifications
-      #certificate_authorities: ["/etc/pki/root/ca.pem"]
-
-      # Certificate for TLS client authentication
-      #certificate: "/etc/pki/client/cert.pem"
-
-      # Client Certificate Key
-      #certificate_key: "/etc/pki/client/cert.key"
-
-      # Controls whether the client verifies server certificates and host name.
-      # If insecure is set to true, all server host names and certificates will be
-      # accepted. In this mode TLS based connections are susceptible to
-      # man-in-the-middle attacks. Use only for testing.
-      #insecure: false
-
-      # Configure cipher suites to be used for TLS connections
-      #cipher_suites: []
-
-      # Configure curve types for ECDHE based cipher suites
-      #curve_types: []
+{% if 'ssl' in filebeat_combined.output.logstash %}
+    # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-output-ssl.html
+    # ssl:
+      # certificate_authorities: ["/etc/pki/root/ca.pem"]
+      # certificate: "/etc/pki/client/cert.pem"
+      # key: "/etc/pki/client/cert.key"
 {% endif %}
+
+{% if 'timeout' in filebeat_combined.output.logstash %}
+    # The number of seconds to wait for responses from the Logstash server
+    # before timing out.
+    #
+    # The default is 30 (seconds).
+    timeout: {{ filebeat_combined.output.logstash.timeout }}
+{% endif %}
+
+{% if 'max_retries' in filebeat_combined.output.logstash %}
+    # The number of times to retry publishing an event after a publishing
+    # failure. After the specified number of retries, the events are
+    # typically dropped. Some Beats, such as Filebeat, ignore the max_retries
+    # setting and retry until all events are published.
+    #
+    # Set max_retries to a value less than 0 to retry until all events are published.
+    #
+    # The default is 3.
+    max_retries: {{ filebeat_combined.output.logstash.max_retries }}
+{% endif %}
+
+{% if 'bulk_max_size' in filebeat_combined.output.logstash %}
+    # The maximum number of events to bulk in a single Logstash request.
+    #
+    # The default is 2048.
+    #
+    # If the Beat sends single events, the events are collected into batches.
+    # If the Beat publishes a large batch of events (larger than the value
+    # specified by bulk_max_size), the batch is split.
+    #
+    # Specifying a larger batch size can improve performance by lowering the
+    # overhead of sending events. However big batch sizes can also increase
+    # processing times, which might result in API errors, killed connections,
+    # timed-out publishing requests, and, ultimately, lower throughput.
+    #
+    # Setting bulk_max_size to values less than or equal to 0 disables
+    # buffering in libbeat. When buffering is disabled, Beats that publish
+    # single events (such as Packetbeat) send each event directly to
+    # Elasticsearch. Beats that publish data in batches (such as Filebeat)
+    # send events in batches based on the spooler size.
+    bulk_max_size: {{ filebeat_combined.output.logstash.bulk_max_size }}
+{% endif %}
+
+{% if 'slow_start' in filebeat_combined.output.logstash %}
+    # If enabled only a subset of events in a batch of events is transferred
+    # per transaction. The number of events to be sent increases up to
+    # bulk_max_size if no error is encountered. On error the number of events
+    # per transaction is reduced again.
+    #
+    # The default is false.
+    slow_start: "{ filebeat_combined.output.logstash.slow_start }}"
+{% endif %}
+
 {% endif %}
 
 
@@ -515,7 +610,7 @@ output:
   file:
     # Enabled this?
     enabled: "{{ filebeat_combined.output.file.enabled }}"
-    
+
     # Path to the directory where to save the generated files. The option is mandatory.
     path: "{{ filebeat_combined.output.file.path }}"
 
@@ -546,11 +641,34 @@ output:
   #
   # https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html
   console:
-    # Enable this?
+{% if 'enabled' in filebeat_combined.output.console %}
+    # The enabled config is a boolean setting to enable or disable the output.
+    # If set to false, the output is disabled.
+    #
+    # The default value is true.
     enabled: "{{ filebeat_combined.output.console.enabled }}"
+{% endif %}
 
-    # Pretty print json event
+{% if 'pretty' in filebeat_combined.output.console %}
+    # If pretty is set to true, events written to stdout will be nicely formatted.
+    #
+    # The default is false.
     pretty: "{{ filebeat_combined.output.console.pretty }}"
+{% endif %}
+
+{% if 'bulk_max_size' in filebeat_combined.output.console %}
+    # The maximum number of events to buffer internally during publishing.
+    #
+    # The default is 2048.
+    #
+    # Specifying a larger batch size may add some latency and buffering during
+    # publishing. However, for Console output, this setting does not affect how
+    # events are published.
+    #
+    # Setting bulk_max_size to 0 disables buffering in libbeat.
+    bulk_max_size: {{ filebeat_combined.output.console.bulk_max_size }}
+{% endif %}
+
 {% endif %}
 
 
@@ -584,13 +702,13 @@ logging:
 {% if 'to_syslog' in filebeat_combined.logging %}
   # Send all logging output to syslog. On Windows default is false, otherwise
   # default is true.
-  to_syslog: {{ filebeat_combined.logging.to_syslog }}
+  to_syslog: "{{ filebeat_combined.logging.to_syslog }}"
 {% endif %}
 
 {% if 'to_files' in filebeat_combined.logging %}
   # Write all logging output to files. Beats automatically rotate files if rotateeverybytes
   # limit is reached.
-  to_files: {{ filebeat_combined.logging.to_files }}
+  to_files: "{{ filebeat_combined.logging.to_files }}"
 {% endif %}
 
 {% if 'files' in filebeat_combined.logging %}

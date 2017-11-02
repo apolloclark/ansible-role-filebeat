@@ -4,14 +4,15 @@
 # https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration-details.html
 elastic_url: "https://artifacts.elastic.co"
 
-# Overload ariables using the dict named filebeat
+# Overload variables using the dict named "filebeat"
 filebeat:
-  version: "latest"
+  version: "5.x"
 
 filebeat_defaults:
   daemon: "filebeat"
-  version: "latest"
+  version: "5.x"
   config_include_dir: "/etc/filebeat/"
+  install_only: "false"
 
   # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-global-options.html
   global:
@@ -62,10 +63,10 @@ filebeat_defaults:
 
     # https://www.elastic.co/guide/en/beats/filebeat/current/elasticsearch-output.html
     elasticsearch:
-      enabled: "true"
-      hosts: '["http://localhost:9200"]'
+      enabled: "false"
+      hosts: ""
       compression_level: 0
-      worker: 3
+      worker: 1
       username: ""
       password: ""
       parameters: {}
@@ -103,11 +104,28 @@ filebeat_defaults:
     logstash:
       enabled: "false"
       hosts: '["localhost:5044"]'
-      worker: 1
-      bulk_max_size: 1024
       compression_level: 3
+      worker: 1
       loadbalance: "true"
+      pipelining: 0
+      proxy_url: ""
+      proxy_use_local_resolver: "false"
       index: "filebeat"
+      # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-output-ssl.html
+      # ssl:
+        # certificate_authorities: ["/etc/pki/root/ca.pem"]
+        # certificate: "/etc/pki/client/cert.pem"
+        # key: "/etc/pki/client/cert.key"
+      timeout: 30
+      max_retries: 3
+      bulk_max_size: 2048
+      slow_start: "false"
+      
+    kafka:
+      enabled: "false"
+      
+    redis:
+      enabled: "false"
 
     # https://www.elastic.co/guide/en/beats/filebeat/current/file-output.html
     file:
@@ -121,6 +139,7 @@ filebeat_defaults:
     console:
       enabled: "false"
       pretty: "false"
+      bulk_max_size: 2048
 
   # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-logging.html
   logging:

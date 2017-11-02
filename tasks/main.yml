@@ -17,15 +17,17 @@
   apt_repository:
     repo: 'deb https://artifacts.elastic.co/packages/5.x/apt stable main'
     state: present
+  when: "filebeat_combined.version == '5.x'"
 
 - name: Update apt cache
   apt: update_cache=yes
+  when: "filebeat_combined.version == '5.x'"
 
 - name: Install filebeat, from repo (if choosing the latest)
   apt:
     name: filebeat
     state: installed
-  when: "filebeat_combined.version == 'latest'"
+  when: "filebeat_combined.version == '5.x'"
 
 - name: Get the platform (i386 or amd64) of the virtual machine
   command: dpkg --print-architecture
@@ -39,11 +41,11 @@
   get_url:
     url={{ elastic_url }}/downloads/beats/filebeat/filebeat-{{ filebeat_combined.version }}-{{ platform }}.deb
     dest=/opt/filebeat.deb
-  when: "filebeat_combined.version != 'latest'"
+  when: "filebeat_combined.version != '5.x'"
 
 - name: Install filebeat, from deb (if choosing a specific version)
   apt: deb=/opt/filebeat.deb
-  when: "filebeat_combined.version != 'latest'"
+  when: "filebeat_combined.version != '5.x'"
 
 # http://docs.ansible.com/ansible/latest/template_module.html
 - name: Copy config file
@@ -54,3 +56,10 @@
     group: root
     mode: 0644
   notify: restart filebeat
+  when: "filebeat_combined.install_only != 'true'"
+
+- name: Restart Filebeat
+  service:
+    name: "{{ filebeat_combined.daemon }}"
+    state: restarted
+    sleep: 15
