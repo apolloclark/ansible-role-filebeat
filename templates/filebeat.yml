@@ -595,7 +595,7 @@ output:
     # per transaction is reduced again.
     #
     # The default is false.
-    slow_start: "{ filebeat_combined.output.logstash.slow_start }}"
+    slow_start: "{{ filebeat_combined.output.logstash.slow_start }}"
 {% endif %}
 
 {% endif %}
