@@ -60,7 +60,6 @@ filebeat_defaults:
       document_type: "misc_log"
 
   output:
-
     # https://www.elastic.co/guide/en/beats/filebeat/current/elasticsearch-output.html
     elasticsearch:
       enabled: "false"
