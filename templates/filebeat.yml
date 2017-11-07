@@ -735,7 +735,13 @@ logging:
 {% if 'metrics' in filebeat_combined.logging %}
   # Enable metrics recording
   metrics:
-    enabled: {{ filebeat_combined.logging.metrics.enabled }}
-    period: {{ filebeat_combined.logging.metrics.period }}
+
+{% if 'enabled' in filebeat_combined.logging.metrics %}
+    enabled: "{{ filebeat_combined.logging.metrics.enabled }}"
+{% endif %}
+
+{% if 'period' in filebeat_combined.logging.metrics %}
+    period: "{{ filebeat_combined.logging.metrics.period }}"
+{% endif %}
 {% endif %}
 {% endif %}

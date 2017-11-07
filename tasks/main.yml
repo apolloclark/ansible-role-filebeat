@@ -47,6 +47,12 @@
   apt: deb=/opt/filebeat.deb
   when: "filebeat_combined.version != '5.x'"
 
+# http://docs.ansible.com/ansible/latest/service_module.html
+- name: Make sure Filebeat autostarts
+  service:
+    name: filebeat
+    enabled: yes
+
 # http://docs.ansible.com/ansible/latest/template_module.html
 - name: Copy config file
   template:

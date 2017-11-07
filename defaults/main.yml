@@ -101,7 +101,7 @@ filebeat_defaults:
 
     # https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html
     logstash:
-      enabled: "true"
+      enabled: "false"
       hosts: '["localhost:5044"]'
       compression_level: 3
       worker: 1
@@ -151,3 +151,6 @@ filebeat_defaults:
       name: "filebeat.log"
       rotateeverybytes: 10485760 # = 10MB
       keepfiles: 7
+    metrics:
+      enabled: "false"
+      period: "30s"
