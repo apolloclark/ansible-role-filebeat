@@ -258,7 +258,7 @@ output:
     # be defined as a URL or IP:PORT. For example: http://192.15.3.2,
     # https://es.found.io:9230 or 192.24.3.2:9300. If no port is specified,
     # 9200 is used.
-    hosts: {{ filebeat_combined.output.elasticsearch.hosts | to_yaml }}
+    hosts: {{ filebeat_combined.output.elasticsearch.hosts | to_json }}
 {% endif %}
 
 {% if 'compression_level' in filebeat_combined.output.elasticsearch %}
