@@ -52,6 +52,7 @@
   service:
     name: filebeat
     enabled: yes
+  when: "filebeat_combined.install_only != 'true'"
 
 # http://docs.ansible.com/ansible/latest/template_module.html
 - name: Copy config file
@@ -69,3 +70,4 @@
     name: "{{ filebeat_combined.daemon }}"
     state: restarted
     sleep: 15
+  when: "filebeat_combined.install_only != 'true'"
