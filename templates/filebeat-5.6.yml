@@ -1,0 +1,743 @@
+#jinja2: trim_blocks: "true", lstrip_blocks: "true"
+################### Filebeat Configuration Example #########################
+
+############################# Filebeat ######################################
+#
+# Glolbal filebeat configuration options
+#
+# https://www.elastic.co/guide/en/beats/filebeat/5.6/configuration-global-options.html
+#
+filebeat:
+
+  {% if 'spool_size' in filebeat_combined and
+         filebeat_combined.spool_size %}
+  # Event count spool threshold - forces network flush if exceeded
+  spool_size: {{ filebeat_combined.spool_size }}
+  {% endif %}
+
+  {% if 'publish_async' in filebeat_combined %}
+  # Enable async publisher pipeline in filebeat (Experimental!)
+  publish_async: "{{ filebeat_combined.publish_async }}"
+  {% endif %}
+
+  {% if 'idle_timeout' in filebeat_combined and
+         filebeat_combined.idle_timeout %}
+  # Defines how often the spooler is flushed. After idle_timeout the spooler is
+  # Flush even though spool_size is not reached.
+  idle_timeout: "{{ filebeat_combined.idle_timeout }}"
+  {% endif %}
+
+  {% if 'registry_file' in filebeat_combined and
+         filebeat_combined.registry_file %}
+  # Name of the registry file. Per default it is put in the current working
+  # directory. In case the working directory is changed after when running
+  # filebeat again, indexing starts from the beginning again.
+  registry_file: "{{ filebeat_combined.registry_file }}"
+  {% endif %}
+
+  {% if 'config_dir' in filebeat_combined and
+         filebeat_combined.config_dir %}
+  # Full Path to directory with additional prospector configuration files. Each file must end with .yml
+  # These config files must have the full filebeat config part inside, but only
+  # the prospector part is processed. All global options like spool_size are ignored.
+  # The config_dir MUST point to a different directory then where the main filebeat config file is in.
+  config_dir: "{{ filebeat_combined.config_dir }}"
+  {% endif %}
+
+  {% if 'shutdown_timeout' in filebeat_combined and
+         filebeat_combined.shutdown_timeout %}
+  # How long Filebeat waits on shutdown for the publisher to finish sending events before Filebeat shuts down.
+  shutdown_timeout: {{ filebeat_combined.shutdown_timeout }}
+  {% endif %}
+
+
+
+  #
+  # List of prospectors to fetch data.
+  #
+  # https://www.elastic.co/guide/en/beats/filebeat/5.6/configuration-filebeat-options.html
+  prospectors:
+    # Each - is a prospector. Below are the prospector specific configurations
+    {% for prospector in filebeat_combined.prospectors %}
+    -
+      # Paths that should be crawled and fetched. Glob based paths.
+      # To fetch all ".log" files from a specific level of subdirectories
+      # /var/log/*/*.log can be used.
+      # For each file found under this path, a harvester is started.
+      # Make sure not file is defined twice as this can lead to unexpected behaviour.
+      paths:
+      {% for path in prospector.paths %}
+        - {{ path }}
+      {% endfor %}
+
+      {% if 'encoding' in prospector %}
+      # Configure the file encoding for reading files with international characters
+      # following the W3C recommendation for HTML5 (http://www.w3.org/TR/encoding).
+      # Some sample encodings:
+      #   plain, utf-8, utf-16be-bom, utf-16be, utf-16le, big5, gb18030, gbk,
+      #    hz-gb-2312, euc-kr, euc-jp, iso-2022-jp, shift-jis, ...
+      encoding: "{{ prospector.encoding }}"
+      {% endif %}
+
+      # Type of the files. Based on this the way the file is read is decided.
+      # The different types cannot be mixed in one prospector
+      #
+      # Possible options are:
+      # * log: Reads every line of the log file (default)
+      # * stdin: Reads the standard in
+      input_type: "{{ prospector.input_type }}"
+
+      {% if 'exclude_lines' in prospector %}
+      # Exclude lines. A list of regular expressions to match. It drops the lines that are
+      # matching any regular expression from the list. The include_lines is called before
+      # exclude_lines. By default, no lines are dropped.
+      exclude_lines: "{{ prospector.exclude_lines }}"
+      {% endif %}
+
+      {% if 'include_lines' in prospector %}
+      # Include lines. A list of regular expressions to match. It exports the lines that are
+      # matching any regular expression from the list. The include_lines is called before
+      # exclude_lines. By default, all the lines are exported.
+      include_lines: "{{ prospector.include_lines }}"
+      {% endif %}
+
+      {% if 'exclude_files' in prospector %}
+      # Exclude files. A list of regular expressions to match. Filebeat drops the files that
+      # are matching any regular expression from the list. By default, no files are dropped.
+      exclude_files: "{{ prospector.exclude_files }}"
+      {% endif %}
+
+      {% if 'fields' in prospector %}
+      # Optional additional fields. These field can be freely picked
+      # to add additional information to the crawled log files for filtering
+      #fields:
+      #  level: debug
+      #  review: 1
+      {% endif %}
+
+      {% if 'fields_under_root' in prospector %}
+      # Set to true to store the additional fields as top level fields instead
+      # of under the "fields" sub-dictionary. In case of name conflicts with the
+      # fields added by Filebeat itself, the custom fields overwrite the default
+      # fields. Default is false.
+      fields_under_root: "{{ prospector.fields_under_root }}"
+      {% endif %}
+
+      {% if 'ignore_older' in prospector %}
+      # Ignore files which were modified more then the defined timespan in the past.
+      # In case all files on your system must be read you can set this value very large.
+      # Time strings like 2h (2 hours), 5m (5 minutes) can be used.
+      ignore_older: "{{ prospector.ignore_older }}"
+      {% endif %}
+
+      {% if 'close_older' in prospector %}
+      # Close older closes the file handler for which were not modified
+      # for longer then close_older
+      # Time strings like 2h (2 hours), 5m (5 minutes) can be used.
+      close_older: "{{ prospector.close_older }}"
+      {% endif %}
+
+      # Type to be published in the 'type' field. For Elasticsearch output,
+      # the type defines the document type these entries should be stored
+      # in. Default: log
+      document_type: "{{ prospector.document_type }}"
+
+      {% if 'scan_frequency' in prospector %}
+      # Scan frequency in seconds.
+      # How often these files should be checked for changes. In case it is set
+      # to 0s, it is done as often as possible. Default: 10s
+      scan_frequency: "{{ prospector.scan_frequency }}"
+      {% endif %}
+
+      {% if 'harvester_buffer_size' in prospector %}
+      # Defines the buffer size every harvester uses when fetching the file
+      harvester_buffer_size: {{ prospector.harvester_buffer_size }}
+      {% endif %}
+
+      {% if 'max_bytes' in prospector %}
+      # Maximum number of bytes a single log event can have
+      # All bytes after max_bytes are discarded and not sent. The default is 10MB.
+      # This is especially useful for multiline log messages which can get large.
+      max_bytes: {{ prospector.max_bytes }}
+      {% endif %}
+
+      {% if 'multiline' in prospector %}
+      # Mutiline can be used for log messages spanning multiple lines. This is common
+      # for Java Stack Traces or C-Line Continuation
+      #multiline:
+
+        # The regexp Pattern that has to be matched. The example pattern matches all lines starting with [
+        #pattern: ^\[
+
+        # Defines if the pattern set under pattern should be negated or not. Default is false.
+        #negate: false
+
+        # Match can be set to "after" or "before". It is used to define if lines should be append to a pattern
+        # that was (not) matched before or after or as long as a pattern is not matched based on negate.
+        # Note: After is the equivalent to previous and before is the equivalent to to next in Logstash
+        #match: after
+
+        # The maximum number of lines that are combined to one event.
+        # In case there are more the max_lines the additional lines are discarded.
+        # Default is 500
+        #max_lines: 500
+
+        # After the defined timeout, an multiline event is sent even if no new pattern was found to start a new event
+        # Default is 5s.
+        #timeout: 5s
+      {% endif %}
+
+      {% if 'tail_files' in prospector %}
+      # Setting tail_files to true means filebeat starts readding new files at the end
+      # instead of the beginning. If this is used in combination with log rotation
+      # this can mean that the first entries of a new file are skipped.
+      tail_files: "{{ prospector.tail_files }}"
+      {% endif %}
+
+      {% if 'backoff' in prospector %}
+      # Backoff values define how agressively filebeat crawls new files for updates
+      # The default values can be used in most cases. Backoff defines how long it is waited
+      # to check a file again after EOF is reached. Default is 1s which means the file
+      # is checked every second if new lines were added. This leads to a near real time crawling.
+      # Every time a new line appears, backoff is reset to the initial value.
+      backoff: "{{ prospector.backoff }}"
+      {% endif %}
+
+      {% if 'max_backoff' in prospector %}
+      # Max backoff defines what the maximum backoff time is. After having backed off multiple times
+      # from checking the files, the waiting time will never exceed max_backoff idenependent of the
+      # backoff factor. Having it set to 10s means in the worst case a new line can be added to a log
+      # file after having backed off multiple times, it takes a maximum of 10s to read the new line
+      max_backoff: "{{ prospector.max_backoff }}"
+      {% endif %}
+
+      {% if 'backoff_factor' in prospector %}
+      # The backoff factor defines how fast the algorithm backs off. The bigger the backoff factor,
+      # the faster the max_backoff value is reached. If this value is set to 1, no backoff will happen.
+      # The backoff value will be multiplied each time with the backoff_factor until max_backoff is reached
+      backoff_factor: "{{ prospector.backoff_factor }}"
+      {% endif %}
+
+      {% if 'force_close_files' in prospector %}
+      # This option closes a file, as soon as the file name changes.
+      # This config option is recommended on windows only. Filebeat keeps the files it's reading open. This can cause
+      # issues when the file is removed, as the file will not be fully removed until also Filebeat closes
+      # the reading. Filebeat closes the file handler after ignore_older. During this time no new file with the
+      # same name can be created. Turning this feature on the other hand can lead to loss of data
+      # on rotate files. It can happen that after file rotation the beginning of the new
+      # file is skipped, as the reading starts at the end. We recommend to leave this option on false
+      # but lower the ignore_older value to release files faster.
+      force_close_files: "{{ prospector.force_close_files }}"
+      {% endif %}
+    {% endfor %}
+
+
+
+
+
+############################# Output ##########################################
+#
+# Configure what outputs to use when sending the data collected by the beat.
+# Multiple outputs may be used.
+#
+{% if 'elasticsearch' in filebeat_combined.output %}
+#
+#------------------------- Elasticsearch output -----------------------------
+#
+# https://www.elastic.co/guide/en/beats/filebeat/5.6/elasticsearch-output.html
+output.elasticsearch:
+
+  {% if 'enabled' in filebeat_combined.output.elasticsearch %}
+  # The enabled config is a boolean setting to enable or disable the output.
+  # If set to false, the output is disabled.
+  #
+  # The default value is true.
+  enabled: "{{ filebeat_combined.output.elasticsearch.enabled }}"
+  {% endif %}
+
+  {% if 'hosts' in filebeat_combined.output.elasticsearch %}
+  # The list of Elasticsearch nodes to connect to. The events are distributed
+  # to these nodes in round robin order. If one node becomes unreachable, the
+  # event is automatically sent to another node. Each Elasticsearch node can
+  # be defined as a URL or IP:PORT. For example: http://192.15.3.2,
+  # https://es.found.io:9230 or 192.24.3.2:9300. If no port is specified,
+  # 9200 is used.
+  hosts: {{ filebeat_combined.output.elasticsearch.hosts | to_nice_json }}
+  {% endif %}
+
+  {% if 'compression_level' in filebeat_combined.output.elasticsearch %}
+  # The gzip compression level. Setting this value to 0 disables compression.
+  # The compression level must be in the range of 1 (best speed) to 9 (best
+  # compression).
+  #
+  # Increasing the compression level will reduce the network usage but will
+  # increase the cpu usage.
+  #
+  # The default value is 0.
+  compression_level: {{ filebeat_combined.output.elasticsearch.compression_level }}
+  {% endif %}
+
+  {% if 'worker' in filebeat_combined.output.elasticsearch %}
+  # The number of workers per configured host publishing events to
+  # Elasticsearch. This is best used with load balancing mode enabled.
+  # Example: If you have 2 hosts and 3 workers, in total 6 workers are
+  # started (3 for each host).
+  worker: {{ filebeat_combined.output.elasticsearch.worker }}
+  {% endif %}
+
+  {% if 'username' in filebeat_combined.output.elasticsearch %}
+  # The basic authentication username for connecting to Elasticsearch.
+  username: "{{ filebeat_combined.output.elasticsearch.username }}"
+  {% endif %}
+
+  {% if 'password' in filebeat_combined.output.elasticsearch %}
+  # The basic authentication password for connecting to Elasticsearch.
+  password: "{{ filebeat_combined.output.elasticsearch.password }}"
+  {% endif %}
+
+  {% if 'parameters' in filebeat_combined.output.elasticsearch %}
+  # Dictionary of HTTP parameters to pass within the url with index operations.
+  parameters: {{ filebeat_combined.output.elasticsearch.parameters }}
+  {% endif %}
+
+  {% if 'protocol' in filebeat_combined.output.elasticsearch %}
+  # The name of the protocol Elasticsearch is reachable on. The options
+  # are: http or https. The default is http. However, if you specify a URL
+  # for hosts, the value of protocol is overridden by whatever scheme you
+  # specify in the URL.
+  protocol: "{{ filebeat_combined.output.elasticsearch.protocol }}"
+  {% endif %}
+
+  {% if 'path' in filebeat_combined.output.elasticsearch %}
+  # An HTTP path prefix that is prepended to the HTTP API calls. This is
+  # useful for the cases where Elasticsearch listens behind an HTTP reverse
+  # proxy that exports the API under a custom prefix.
+  path: "{{ filebeat_combined.output.elasticsearch.path }}"
+  {% endif %}
+
+  {% if 'headers' in filebeat_combined.output.elasticsearch %}
+  # Custom HTTP headers to add to each request created by the Elasticsearch
+  # output. It is generally possible to specify multiple header values
+  # for the same header name by separating them with a comma.
+  headers: {{ filebeat_combined.output.elasticsearch.headers }}
+  {% endif %}
+
+  {% if 'proxy_url' in filebeat_combined.output.elasticsearch %}
+  # The URL of the proxy to use when connecting to the Elasticsearch servers.
+  # The value may be either a complete URL or a "host[:port]", in which case
+  # the "http" scheme is assumed. If a value is not specified through the
+  # configuration file then proxy environment variables are used. See the
+  # golang documentation for more information about the environment variables.
+  proxy_url: "{{ filebeat_combined.output.elasticsearch.proxy_url }}"
+  {% endif %}
+
+  {% if 'index' in filebeat_combined.output.elasticsearch %}
+  # The index name to write events to. The default is "filebeat-%{+yyyy.MM.dd}"
+  # (for example, "filebeat-2015.04.26").
+  index: "{{ filebeat_combined.output.elasticsearch.index }}"
+  {% endif %}
+
+  {% if 'indices' in filebeat_combined.output.elasticsearch %}
+  # Array of index selector rules supporting conditionals, format string based
+  # field access and name mappings. The first rule matching will be used
+  # to set the index for the event to be published. If indices is missing
+  # or no rule matches, the index field will be used.
+  indices: {{ filebeat_combined.output.elasticsearch.indices }}
+  {% endif %}
+
+  {% if 'pipeline' in filebeat_combined.output.elasticsearch %}
+  # A format string value that specifies the ingest node pipeline to write events to.
+  pipeline: "{{ filebeat_combined.output.elasticsearch.pipeline }}"
+  {% endif %}
+
+  {% if 'pipelines' in filebeat_combined.output.elasticsearch %}
+  # Similar to the indices array, this is an array of pipeline selector
+  # configurations supporting conditionals, format string based field access
+  # and name mappings. The first rule matching will be used to set the
+  # pipeline for the event to be published. If pipelines is missing or no
+  # rule matches, the pipeline field will be used.
+  pipelines: {{ filebeat_combined.output.elasticsearch.pipelines }}
+  {% endif %}
+
+  {% if 'template' in filebeat_combined.output.elasticsearch %}
+  # The index template to use for setting mappings in Elasticsearch. By
+  # default, template loading is enabled.
+  template:
+
+    {% if 'enabled' in filebeat_combined.output.elasticsearch.template %}
+    # Set to false to disable template loading. If set this to false, you
+    # must load the template manually.s
+    enabled: "{{ filebeat_combined.output.elasticsearch.template.enabled }}"
+    {% endif %}
+
+    {% if 'name' in filebeat_combined.output.elasticsearch.template %}
+    # The name of the template. The default is filebeat.
+    name: "{{ filebeat_combined.output.elasticsearch.template.name }}"
+    {% endif %}
+
+    {% if 'path' in filebeat_combined.output.elasticsearch.template %}
+    # The path to the template file. The default is filebeat.template.json.
+    # If a relative path is set, it is considered relative to the config
+    # path. See the Directory Layout section for details.
+    path: "{{ filebeat_combined.output.elasticsearch.template.path }}"
+    {% endif %}
+
+    {% if 'overwrite' in filebeat_combined.output.elasticsearch.template %}
+    # A boolean that specifies whether to overwrite the existing template.
+    # The default is false.
+    overwrite: "{{ filebeat_combined.output.elasticsearch.template.overwrite }}"
+    {% endif %}
+  {% endif %}
+
+  {% if 'max_retries' in filebeat_combined.output.elasticsearch %}
+  # The number of times to retry publishing an event after a publishing
+  # failure. After the specified number of retries, the events are typically
+  # dropped. Some Beats, such as Filebeat, ignore the max_retries setting
+  # and retry until all events are published.
+  #
+  # Set max_retries to a value less than 0 to retry until all events are
+  # published.
+  #
+  # The default is 3.
+  max_retries: {{ filebeat_combined.output.elasticsearch.max_retries }}
+  {% endif %}
+
+  {% if 'bulk_max_size' in filebeat_combined.output.elasticsearch %}
+  # The maximum number of events to bulk in a single Elasticsearch bulk API
+  # index request. The default is 50.
+  #
+  # If the Beat sends single events, the events are collected into batches.
+  # If the Beat publishes a large batch of events (larger than the value
+  # specified by bulk_max_size), the batch is split.
+  #
+  # Specifying a larger batch size can improve performance by lowering the
+  # overhead of sending events. However big batch sizes can also increase
+  # processing times, which might result in API errors, killed connections,
+  # timed-out publishing requests, and, ultimately, lower throughput.
+  #
+  # Setting bulk_max_size to values less than or equal to 0 disables buffering
+  # in libbeat. When buffering is disabled, Beats that publish single events
+  # (such as Packetbeat) send each event directly to Elasticsearch. Beats
+  # that publish data in batches (such as Filebeat) send events in batches
+  # based on the spooler size.
+  bulk_max_size: {{ filebeat_combined.output.elasticsearch.bulk_max_size }}
+  {% endif %}
+
+  {% if 'timeout' in filebeat_combined.output.elasticsearch %}
+  # The http request timeout in seconds for the Elasticsearch request.
+  # The default is 90.
+  timeout: {{ filebeat_combined.output.elasticsearch.timeout }}
+  {% endif %}
+
+  {% if 'flush_interval' in filebeat_combined.output.elasticsearch %}
+  # The number of seconds to wait for new events between two bulk API index
+  # requests. If bulk_max_size is reached before this interval expires,
+  # additional bulk index requests are made.
+  flush_interval: {{ filebeat_combined.output.elasticsearch.flush_interval }}
+  {% endif %}
+
+  {% if 'ssl' in filebeat_combined.output.elasticsearch and 
+         filebeat_combined.output.elasticsearch.ssl %}
+  # https://www.elastic.co/guide/en/beats/filebeat/5.6/configuration-output-ssl.html
+  ssl:
+    # certificate_authorities: ["/etc/pki/root/ca.pem"]
+    # certificate: "/etc/pki/client/cert.pem"
+    # key: "/etc/pki/client/cert.key"
+  {% endif %}
+{% endif %}
+
+{% if 'logstash' in filebeat_combined.output %}
+#------------------------- Logstash output -----------------------------
+#
+# https://www.elastic.co/guide/en/beats/filebeat/5.6/logstash-output.html
+#
+output.logstash:
+
+  {% if 'enabled' in filebeat_combined.output.logstash %}
+  # The enabled config is a boolean setting to enable or disable the output.
+  # If set to false, the output is disabled.
+  #
+  # The default value is true.
+  enabled: "{{ filebeat_combined.output.logstash.enabled }}"
+  {% endif %}
+
+  # The list of known Logstash servers to connect to. If load balancing is
+  # disabled, but mutliple hosts are configured, one host is selected randomly
+  # (there is no precedence). If one host becomes unreachable, another one
+  # is selected randomly.
+  #
+  # All entries in this list can contain a port number. If no port number is
+  # given, the value specified for port is used as the default port number.
+  hosts: {{ filebeat_combined.output.logstash.hosts }}
+
+  {% if 'compression_level' in filebeat_combined.output.logstash %}
+  # The gzip compression level. Setting this value to 0 disables compression.
+  # The compression level must be in the range of 1 (best speed) to 9 (best
+  # compression).
+  #
+  # Increasing the compression level will reduce the network usage but will
+  # increase the cpu usage.
+  #
+  # The default value is 3.
+  compression_level: {{ filebeat_combined.output.logstash.compression_level }}
+  {% endif %}
+
+  {% if 'worker' in filebeat_combined.output.logstash %}
+  # The number of workers per configured host publishing events to Logstash.
+  # This is best used with load balancing mode enabled. Example: If you have
+  # 2 hosts and 3 workers, in total 6 workers are started (3 for each host).
+  worker: {{ filebeat_combined.output.logstash.worker }}
+  {% endif %}
+
+  {% if 'loadbalance' in filebeat_combined.output.logstash %}
+  # If set to true and multiple Logstash hosts are configured, the output
+  # plugin load balances published events onto all Logstash hosts. If set to
+  # false, the output plugin sends all events to only one host (determined
+  # at random) and will switch to another host if the selected one becomes
+  # unresponsive.
+  #
+  # The default value is false.
+  loadbalance: "{{ filebeat_combined.output.logstash.loadbalance }}"
+  {% endif %}
+
+  {% if 'pipelining' in filebeat_combined.output.logstash %}
+  # Configures number of batches to be send asynchronously to logstash while
+  # waiting for ACK from logstash. Output only becomes blocking once number
+  # of pipelining batches have been written. Pipelining is disabled if a
+  # values of 0 is configured.
+  #
+  # The default value is 0.
+  pipelining: {{ filebeat_combined.output.logstash.pipelining }}
+  {% endif %}
+
+  {% if 'proxy_url' in filebeat_combined.output.logstash %}
+  # The URL of the SOCKS5 proxy to use when connecting to the Logstash servers.
+  # The value must be a URL with a scheme of socks5://. The protocol used
+  # to communicate to Logstash is not based on HTTP so a web-proxy cannot
+  # be used.
+  #
+  # If the SOCKS5 proxy server requires client authentication, then a
+  # username and password can be embedded in the URL as shown in the example.
+  #
+  # When using a proxy, hostnames are resolved on the proxy server instead of
+  # on the client. You can change this behavior by setting the
+  # proxy_use_local_resolver option.
+  proxy_url: "{{ filebeat_combined.output.logstash.proxy_url }}"
+  {% endif %}
+
+  {% if 'proxy_use_local_resolver' in filebeat_combined.output.logstash %}
+  # The proxy_use_local_resolver option determines if Logstash hostnames are
+  # resolved locally when using a proxy. The default value is false which
+  # means that when a proxy is used the name resolution occurs on the proxy
+  # server.
+  proxy_use_local_resolver: "{{ filebeat_combined.output.logstash.proxy_use_local_resolver }}"
+  {% endif %}
+
+  {% if 'index' in filebeat_combined.output.logstash %}
+  # Optional index name. The default index name depends on the each beat.
+  # For Packetbeat, the default is set to packetbeat, for Topbeat
+  # top topbeat and for Filebeat to filebeat.
+  index: "{{ filebeat_combined.output.logstash.index }}"
+  {% endif %}
+
+  {% if 'ssl' in filebeat_combined.output.logstash %}
+  # https://www.elastic.co/guide/en/beats/filebeat/5.6/configuration-output-ssl.html
+  # ssl:
+    # certificate_authorities: ["/etc/pki/root/ca.pem"]
+    # certificate: "/etc/pki/client/cert.pem"
+    # key: "/etc/pki/client/cert.key"
+  {% endif %}
+
+  {% if 'timeout' in filebeat_combined.output.logstash %}
+  # The number of seconds to wait for responses from the Logstash server
+  # before timing out.
+  #
+  # The default is 30 (seconds).
+  timeout: {{ filebeat_combined.output.logstash.timeout }}
+  {% endif %}
+
+  {% if 'max_retries' in filebeat_combined.output.logstash %}
+  # The number of times to retry publishing an event after a publishing
+  # failure. After the specified number of retries, the events are
+  # typically dropped. Some Beats, such as Filebeat, ignore the max_retries
+  # setting and retry until all events are published.
+  #
+  # Set max_retries to a value less than 0 to retry until all events are published.
+  #
+  # The default is 3.
+  max_retries: {{ filebeat_combined.output.logstash.max_retries }}
+  {% endif %}
+
+  {% if 'bulk_max_size' in filebeat_combined.output.logstash %}
+  # The maximum number of events to bulk in a single Logstash request.
+  #
+  # The default is 2048.
+  #
+  # If the Beat sends single events, the events are collected into batches.
+  # If the Beat publishes a large batch of events (larger than the value
+  # specified by bulk_max_size), the batch is split.
+  #
+  # Specifying a larger batch size can improve performance by lowering the
+  # overhead of sending events. However big batch sizes can also increase
+  # processing times, which might result in API errors, killed connections,
+  # timed-out publishing requests, and, ultimately, lower throughput.
+  #
+  # Setting bulk_max_size to values less than or equal to 0 disables
+  # buffering in libbeat. When buffering is disabled, Beats that publish
+  # single events (such as Packetbeat) send each event directly to
+  # Elasticsearch. Beats that publish data in batches (such as Filebeat)
+  # send events in batches based on the spooler size.
+  bulk_max_size: {{ filebeat_combined.output.logstash.bulk_max_size }}
+  {% endif %}
+
+  {% if 'slow_start' in filebeat_combined.output.logstash %}
+  # If enabled only a subset of events in a batch of events is transferred
+  # per transaction. The number of events to be sent increases up to
+  # bulk_max_size if no error is encountered. On error the number of events
+  # per transaction is reduced again.
+  #
+  # The default is false.
+  slow_start: "{{ filebeat_combined.output.logstash.slow_start }}"
+  {% endif %}
+{% endif %}
+
+{% if 'file' in filebeat_combined.output %}
+#------------------------- File output -----------------------------
+#
+# https://www.elastic.co/guide/en/beats/filebeat/5.6/file-output.html
+#
+output.file:
+  # Enabled this?
+  enabled: "{{ filebeat_combined.output.file.enabled }}"
+
+  # Path to the directory where to save the generated files. The option is mandatory.
+  path: "{{ filebeat_combined.output.file.path }}"
+
+  {% if 'filename' in filebeat_combined.output.file %}
+  # Name of the generated files. The default is `filebeat` and it generates files: `filebeat`, `filebeat.1`, `filebeat.2`, etc.
+  filename: "{{ filebeat_combined.output.file.filename }}"
+  {% endif %}
+
+  {% if 'rotate_every_kb' in filebeat_combined.output.file %}
+  # Maximum size in kilobytes of each file. When this size is reached, the files are
+  # rotated. The default value is 10 MB.
+  rotate_every_kb: {{ filebeat_combined.output.file.rotate_every_kb }}
+  {% endif %}
+
+  {% if 'number_of_files' in filebeat_combined.output.file %}
+  # Maximum number of files under path. When this number of files is reached, the
+  # oldest file is deleted and the rest are shifted from last to first. The default
+  # is 7 files.
+  number_of_files: {{ filebeat_combined.output.file.number_of_files }}
+  {% endif %}
+{% endif %}
+
+{% if 'console' in filebeat_combined.output %}
+#------------------------- Console output -----------------------------
+#
+# https://www.elastic.co/guide/en/beats/filebeat/5.6/console-output.html
+#
+output.console:
+  {% if 'enabled' in filebeat_combined.output.console %}
+  # The enabled config is a boolean setting to enable or disable the output.
+  # If set to false, the output is disabled.
+  #
+  # The default value is true.
+  enabled: "{{ filebeat_combined.output.console.enabled }}"
+  {% endif %}
+
+  {% if 'pretty' in filebeat_combined.output.console %}
+  # If pretty is set to true, events written to stdout will be nicely formatted.
+  #
+  # The default is false.
+  pretty: "{{ filebeat_combined.output.console.pretty }}"
+  {% endif %}
+
+  {% if 'bulk_max_size' in filebeat_combined.output.console %}
+  # The maximum number of events to buffer internally during publishing.
+  #
+  # The default is 2048.
+  #
+  # Specifying a larger batch size may add some latency and buffering during
+  # publishing. However, for Console output, this setting does not affect how
+  # events are published.
+  #
+  # Setting bulk_max_size to 0 disables buffering in libbeat.
+  bulk_max_size: {{ filebeat_combined.output.console.bulk_max_size }}
+  {% endif %}
+{% endif %}
+
+
+
+
+
+{% if 'logging' in filebeat_combined %}
+############################# Logging #########################################
+#
+# https://www.elastic.co/guide/en/beats/filebeat/5.6/configuration-logging.html
+#
+
+# There are three options for the log ouput: syslog, file, stderr.
+# Under Windos systems, the log files are per default sent to the file output,
+# under all other system per default to syslog.
+logging:
+
+  {% if 'level' in filebeat_combined.logging %}
+  # Sets log level. The default log level is error.
+  # Available log levels are: critical, error, warning, info, debug
+  level: {{ filebeat_combined.logging.level }}
+  {% endif %}
+
+  {% if 'selectors' in filebeat_combined.logging %}
+  # Enable debug output for selected components. To enable all selectors use ["*"]
+  # Other available selectors are beat, publish, service
+  # Multiple selectors can be chained.
+  selectors: {{ filebeat_combined.logging.selectors }}
+  {% endif %}
+
+  {% if 'to_syslog' in filebeat_combined.logging %}
+  # Send all logging output to syslog. On Windows default is false, otherwise
+  # default is true.
+  to_syslog: "{{ filebeat_combined.logging.to_syslog }}"
+  {% endif %}
+
+  {% if 'to_files' in filebeat_combined.logging %}
+  # Write all logging output to files. Beats automatically rotate files if rotateeverybytes
+  # limit is reached.
+  to_files: "{{ filebeat_combined.logging.to_files }}"
+  {% endif %}
+
+  {% if 'files' in filebeat_combined.logging %}
+  # To enable logging to files, to_files option has to be set to true
+  files:
+    # The directory where the log files will written to.
+    path: "{{ filebeat_combined.logging.files.path }}"
+
+    # The name of the files where the logs are written to.
+    name: "{{ filebeat_combined.logging.files.name }}"
+
+    {% if 'rotateeverybytes' in filebeat_combined.logging.files %}
+    # Configure log file size limit. If limit is reached, log file will be
+    # automatically rotated
+    rotateeverybytes: {{ filebeat_combined.logging.files.rotateeverybytes }}
+    {% endif %}
+
+    {% if 'keepfiles' in filebeat_combined.logging.files %}
+    # Number of rotated log files to keep. Oldest files will be deleted first.
+    keepfiles: {{ filebeat_combined.logging.files.keepfiles }}
+    {% endif %}
+  {% endif %}
+
+  {% if 'metrics' in filebeat_combined.logging %}
+  # Enable metrics recording
+  metrics:
+
+    {% if 'enabled' in filebeat_combined.logging.metrics %}
+    enabled: "{{ filebeat_combined.logging.metrics.enabled }}"
+    {% endif %}
+
+    {% if 'period' in filebeat_combined.logging.metrics %}
+    period: "{{ filebeat_combined.logging.metrics.period }}"
+    {% endif %}
+  {% endif %}
+{% endif %}

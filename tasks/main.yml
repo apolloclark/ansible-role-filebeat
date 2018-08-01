@@ -1,39 +1,71 @@
 ---
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name: Get the simplified major.minor version string
+  set_fact:
+    version_simple: "{{ filebeat.version | regex_replace('^([0-9])\\.([0-9]*).*', '\\1.\\2') }}"
+
+# https://docs.ansible.com/ansible/latest/modules/include_vars_module.html
+- name: Include defaults for configuration, per the requested version.
+  include_vars:
+    file: main-{{ version_simple }}.yml
+    
 # http://docs.ansible.com/ansible/latest/set_fact_module.html
 - name: Merge filebeat_default and filebeat variables
   set_fact:
     filebeat_combined: "{{ filebeat_defaults | combine(filebeat, recursive=True) }}"
 
-# https://www.elastic.co/guide/en/beats/filebeat/current/setup-repositories.html
 # http://docs.ansible.com/ansible/latest/apt_key_module.html
 - name: Add repository key
   apt_key:
     url: "https://artifacts.elastic.co/GPG-KEY-elasticsearch"
     id: "46095ACC8548582C1A2699A9D27D666CD88E42B4"
     state: present
+  when:
+    - filebeat_combined.install_repo
 
 # http://docs.ansible.com/ansible/latest/apt_repository_module.html
-- name: Add Server repository
+- name: Add Elastic 5.x repo (if choosing a 5.6.x version)
   apt_repository:
     repo: 'deb https://artifacts.elastic.co/packages/5.x/apt stable main'
     state: present
-  when: "filebeat_combined.version == '5.x'"
+  when:
+    - filebeat_combined.version is version('5.6', '>=')
+    - filebeat_combined.version is version('6', '<')
+    - filebeat_combined.install_repo
 
+# http://docs.ansible.com/ansible/latest/apt_repository_module.html
+- name: Add Elastic 6.x repo (if choosing a 6.x version)
+  apt_repository:
+    repo: 'deb https://artifacts.elastic.co/packages/6.x/apt stable main'
+    state: present
+  when:
+    - filebeat_combined.version is version('6', '>=')
+    - filebeat_combined.version is version('7', '<')
+    - filebeat_combined.install_repo
+
+# https://docs.ansible.com/ansible/latest/modules/apt_module.html
 - name: Update apt cache
   apt: update_cache=yes
-  when: "filebeat_combined.version == '5.x'"
+  when:
+    - filebeat_combined.install_repo
 
-- name: Install from repo (if choosing the 5.x version)
+# https://docs.ansible.com/ansible/latest/modules/apt_module.html
+- name: Install from repo (if choosing the 5.6.x or 6.x version)
   apt:
-    name: filebeat
-    state: installed
-  when: "filebeat_combined.version == '5.x'"
+    name: "filebeat={{ filebeat_combined.version }}"
+    state: present
+  when:
+    - filebeat_combined.version is version('5.6', '>=')
+    - filebeat_combined.version is version('7', '<')
+    - filebeat_combined.install_repo
 
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
 - name: Get the platform (i386 or amd64) of the virtual machine
   command: dpkg --print-architecture
   register: print_architecture
 
-- name: And set the actual platform value as a variable
+# https://docs.ansible.com/ansible/latest/modules/set_fact_module.html
+- name: Set the platform value as a variable
   set_fact:
     platform: "{{ print_architecture.stdout }}"
 
@@ -41,33 +73,56 @@
   get_url:
     url={{ elastic_url }}/downloads/beats/filebeat/filebeat-{{ filebeat_combined.version }}-{{ platform }}.deb
     dest=/opt/filebeat.deb
-  when: "filebeat_combined.version != '5.x'"
+  when:
+    - filebeat_combined.version is version('5.6', '<')
 
+# https://docs.ansible.com/ansible/latest/modules/apt_module.html
 - name: Install from deb (if choosing a specific version)
   apt: deb=/opt/filebeat.deb
-  when: "filebeat_combined.version != '5.x'"
+  when:
+    - filebeat_combined.version is version('5.6', '<')
 
 # http://docs.ansible.com/ansible/latest/service_module.html
-- name: Make sure Filebeat autostarts
+- name: Ensure filebeat auto-starts
   service:
     name: filebeat
     enabled: yes
-  when: "filebeat_combined.install_only != 'true'"
+  when:
+    - not filebeat_combined.install_only
 
 # http://docs.ansible.com/ansible/latest/template_module.html
 - name: Copy config file
   template:
-    src: "filebeat.yml"
+    src: "filebeat-{{ version_simple }}.yml"
     dest: "{{ filebeat_combined.config_include_dir }}/filebeat.yml"
     owner: root
     group: root
     mode: 0644
-  notify: restart filebeat
-  when: "filebeat_combined.install_only != 'true'"
+  when:
+    - not filebeat_combined.install_only
 
-- name: Restart Filebeat
+# https://docs.ansible.com/ansible/latest/modules/command_module.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.2/configuration-template.html
+- name: Configure the Elasticsearch index template
+  command: filebeat setup --template -E output.logstash.enabled=false -E output.elasticsearch.enabled=true -E 'output.elasticsearch.hosts=["{{ item }}"]'
+  loop: "{{ filebeat_combined.output.elasticsearch.hosts }}"
+  when:
+    - filebeat_combined.setup.template.enabled
+    - filebeat_combined.output.elasticsearch.hosts
+
+# http://docs.ansible.com/ansible/latest/service_module.html
+- name: Restart filebeat
   service:
     name: "{{ filebeat_combined.daemon }}"
     state: restarted
-    sleep: 15
-  when: "filebeat_combined.install_only != 'true'"
+  when:
+    - not filebeat_combined.install_only
+
+# http://docs.ansible.com/ansible/latest/service_module.html
+- name: Ensure that the service is running
+  service: 
+    name: filebeat
+    state: started
+    enabled: yes
+  when:
+    - not filebeat_combined.install_only
