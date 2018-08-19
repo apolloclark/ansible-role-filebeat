@@ -1,7 +1,4 @@
 ---
-# https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-getting-started.html
-# https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration.html
-# https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration-details.html
 elastic_url: "https://artifacts.elastic.co"
 
 # Overload variables using the dict named "filebeat"

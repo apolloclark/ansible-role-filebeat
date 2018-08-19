@@ -1,7 +1,7 @@
 ---
-# https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-getting-started.html
-# https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration.html
-# https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration-details.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.2/filebeat-getting-started.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.2/filebeat-configuration.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.2/filebeat-configuration-details.html
 elastic_url: "https://artifacts.elastic.co"
 
 filebeat_defaults:
@@ -11,7 +11,7 @@ filebeat_defaults:
   install_only: false
   install_repo: true
 
-  # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-global-options.html
+  # https://www.elastic.co/guide/en/beats/filebeat/6.2/configuration-global-options.html
   global:
     spool_size: 2048
     publish_async: "false"
@@ -20,7 +20,7 @@ filebeat_defaults:
     config_dir: ""
     shutdown_timeout: ""
   
-  # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-filebeat-options.html
+  # https://www.elastic.co/guide/en/beats/filebeat/6.2/configuration-filebeat-options.html
   prospectors:
     -
       # required settings
@@ -57,7 +57,7 @@ filebeat_defaults:
       document_type: "misc_log"
 
   output:
-    # https://www.elastic.co/guide/en/beats/filebeat/current/elasticsearch-output.html
+    # https://www.elastic.co/guide/en/beats/filebeat/6.2/elasticsearch-output.html
     elasticsearch:
       enabled: "false"
       hosts: ""
@@ -90,13 +90,13 @@ filebeat_defaults:
       bulk_max_size: 50
       timeout: 90
       flush_interval: ""
-      # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-output-ssl.html
+      # https://www.elastic.co/guide/en/beats/filebeat/6.2/configuration-output-ssl.html
       # ssl:
         # certificate_authorities: ["/etc/pki/root/ca.pem"]
         # certificate: "/etc/pki/client/cert.pem"
         # key: "/etc/pki/client/cert.key"
 
-    # https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html
+    # https://www.elastic.co/guide/en/beats/filebeat/6.2/logstash-output.html
     logstash:
       enabled: "false"
       hosts: '["localhost:5044"]'
@@ -107,7 +107,7 @@ filebeat_defaults:
       proxy_url: ""
       proxy_use_local_resolver: "false"
       index: "filebeat"
-      # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-output-ssl.html
+      # https://www.elastic.co/guide/en/beats/filebeat/6.2/configuration-output-ssl.html
       # ssl:
         # certificate_authorities: ["/etc/pki/root/ca.pem"]
         # certificate: "/etc/pki/client/cert.pem"
@@ -116,14 +116,43 @@ filebeat_defaults:
       max_retries: 3
       bulk_max_size: 2048
       slow_start: "false"
-      
+
+    # https://www.elastic.co/guide/en/beats/filebeat/6.2/kafka-output.html
     kafka:
-      enabled: "false"
+      enabled: false
+      hosts:
+        - "127.0.0.1:9092"
+      topic: "filebeat"
+      key: ''
+      partition:
+        hash:
+          reachable_only: false
+          hash: []
+      username: ''
+      password: ''
+      version: '0.10.0'
+      metadata:
+        retry:
+          max: 3
+          backoff: 250ms
+        refresh_frequency: 10m
+      worker: 1
+      max_retires: 3
+      bulk_max_size: 2048
+      timeout: "30s"
+      broker_timeout: "10s"
+      channel_buffer_size: 256
+      keep_alive: 0
+      compression: "gzip"
+      max_message_bytes: 1000000
+      required_acks: 1
+      client_id: "beats"
+      ssl: []
       
     redis:
       enabled: "false"
 
-    # https://www.elastic.co/guide/en/beats/filebeat/current/file-output.html
+    # https://www.elastic.co/guide/en/beats/filebeat/6.2/file-output.html
     file:
       enabled: "false"
       path: "/tmp/filebeat"
@@ -131,13 +160,13 @@ filebeat_defaults:
       rotate_every_kb: 10240
       number_of_files: 7
 
-    # https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html
+    # https://www.elastic.co/guide/en/beats/filebeat/6.2/console-output.html
     console:
       enabled: "false"
       pretty: "false"
       bulk_max_size: 2048
 
-  # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-logging.html
+  # https://www.elastic.co/guide/en/beats/filebeat/6.2/configuration-logging.html
   logging:
     level: "info"
     selectors: '["*"]'

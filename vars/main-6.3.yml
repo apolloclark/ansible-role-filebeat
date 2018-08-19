@@ -1,7 +1,7 @@
 ---
-# https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-getting-started.html
-# https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration.html
-# https://www.elastic.co/guide/en/beats/filebeat/current/filebeat-configuration-details.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.3/filebeat-getting-started.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.3/filebeat-configuration.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.3/filebeat-configuration-details.html
 elastic_url: "https://artifacts.elastic.co"
 
 filebeat_defaults:
@@ -80,7 +80,7 @@ filebeat_defaults:
   # https://www.elastic.co/guide/en/beats/filebeat/6.3/configuration-filebeat-options.html
   input: []
 
-  # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-general-options.html#configuration-global-options
+  # https://www.elastic.co/guide/en/beats/filebeat/6.3/configuration-general-options.html#configuration-global-options
   registry_file: "/var/lib/filebeat/registry"
   registry_file_permissions: "0600"
   overwrite_pipelines: false
@@ -109,7 +109,7 @@ filebeat_defaults:
   processors: []
 
   output:
-    # https://www.elastic.co/guide/en/beats/filebeat/current/elasticsearch-output.html
+    # https://www.elastic.co/guide/en/beats/filebeat/6.3/elasticsearch-output.html
     elasticsearch:
       enabled: false
       hosts:
@@ -132,7 +132,7 @@ filebeat_defaults:
       timeout: 90
       ssl: []
 
-    # https://www.elastic.co/guide/en/beats/filebeat/current/logstash-output.html
+    # https://www.elastic.co/guide/en/beats/filebeat/6.3/logstash-output.html
     logstash:
       enabled: false
       hosts:
@@ -150,12 +150,42 @@ filebeat_defaults:
       proxy_url: ""
       proxy_use_local_resolver: false
       ssl: []
-      
-    kafka: []
+
+    # https://www.elastic.co/guide/en/beats/filebeat/6.3/kafka-output.html
+    kafka:
+      enabled: false
+      hosts:
+        - "127.0.0.1:9092"
+      topic: "filebeat"
+      key: ''
+      partition:
+        hash:
+          reachable_only: false
+          hash: []
+      username: ''
+      password: ''
+      version: '0.10.0'
+      metadata:
+        retry:
+          max: 3
+          backoff: 250ms
+        refresh_frequency: 10m
+      worker: 1
+      max_retires: 3
+      bulk_max_size: 2048
+      timeout: "30s"
+      broker_timeout: "10s"
+      channel_buffer_size: 256
+      keep_alive: 0
+      compression: "gzip"
+      max_message_bytes: 1000000
+      required_acks: 1
+      client_id: "beats"
+      ssl: []
       
     redis: []
 
-    # https://www.elastic.co/guide/en/beats/filebeat/current/file-output.html
+    # https://www.elastic.co/guide/en/beats/filebeat/6.3/file-output.html
     file:
       enabled: false
       path: "/tmp/filebeat"
@@ -163,13 +193,13 @@ filebeat_defaults:
       rotate_every_kb: 10240
       number_of_files: 7
 
-    # https://www.elastic.co/guide/en/beats/filebeat/current/console-output.html
+    # https://www.elastic.co/guide/en/beats/filebeat/6.3/console-output.html
     console:
       enabled: false
       pretty: false
       bulk_max_size: 2048
 
-  # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-path.html
+  # https://www.elastic.co/guide/en/beats/filebeat/6.3/configuration-path.html
   paths:
     home: ""
     config: ""
@@ -198,7 +228,7 @@ filebeat_defaults:
       overwrite: false
       settings: []
 
-    # https://www.elastic.co/guide/en/beats/filebeat/current/setup-kibana-endpoint.html
+    # https://www.elastic.co/guide/en/beats/filebeat/6.3/setup-kibana-endpoint.html
     kibana:
       host: "127.0.0.1:5601"
       protocol: "http"
@@ -207,7 +237,7 @@ filebeat_defaults:
       path: ""
       ssl: []
 
-  # https://www.elastic.co/guide/en/beats/filebeat/current/configuration-logging.html
+  # https://www.elastic.co/guide/en/beats/filebeat/6.3/configuration-logging.html
   logging:
     level: "info"
     selectors: '["*"]'
