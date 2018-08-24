@@ -11,7 +11,7 @@
 
 #==========================  Modules configuration ============================
 #
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/configuration-filebeat-modules.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/configuration-filebeat-modules.html
 #
 filebeat.modules:
 
@@ -96,7 +96,7 @@ filebeat.modules:
 {% if 'apache2' in filebeat_combined.modules and 
        filebeat_combined.modules.apache2 %}
 #------------------------------- Apache2 Module ------------------------------
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/filebeat-module-apache2.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/filebeat-module-apache2.html
 - module: apache2
 
   {% if 'access' in filebeat_combined.modules.apache2 and
@@ -141,7 +141,7 @@ filebeat.modules:
 {% if 'auditd' in filebeat_combined.modules and 
        filebeat_combined.modules.auditd %}
 #------------------------------- Auditd Module -------------------------------
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/filebeat-module-auditd.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/filebeat-module-auditd.html
 #- module: auditd
   #log:
     #enabled: true
@@ -245,7 +245,7 @@ filebeat.modules:
 {% if 'logstash' in filebeat_combined.modules and 
        filebeat_combined.modules.logstash %}
 #------------------------------ logstash Module ------------------------------
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/filebeat-module-logstash.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/filebeat-module-logstash.html
 #- module: logstash
   # logs
   #log:
@@ -285,7 +285,7 @@ filebeat.modules:
 {% if 'mysql' in filebeat_combined.modules and 
        filebeat_combined.modules.mysql %}
 #-------------------------------- MySQL Module -------------------------------
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/filebeat-module-mysql.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/filebeat-module-mysql.html
 #- module: mysql
   # Error logs
   #error:
@@ -344,7 +344,7 @@ filebeat.modules:
 {% if 'osquery' in filebeat_combined.modules and 
        filebeat_combined.modules.osquery %}
 #------------------------------- Osquery Module ------------------------------
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/filebeat-module-osquery.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/filebeat-module-osquery.html
 #- module: osquery
   #result:
     #enabled: true
@@ -420,7 +420,7 @@ filebeat.modules:
 
 #=========================== Filebeat inputs =============================
 #
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/configuration-filebeat-options.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/configuration-filebeat-options.html
 #
 
 # List of inputs to fetch data.
@@ -769,7 +769,7 @@ filebeat.inputs:
 
 #================================ General ======================================
 #
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/configuration-general-options.html#configuration-general
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/configuration-general-options.html#configuration-general
 #
 
 # The name of the shipper that publishes the network data. It can be used to group
@@ -977,7 +977,7 @@ filebeat.inputs:
 
 #================================ Outputs ======================================
 #
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/configuring-output.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/configuring-output.html
 #
 # Configure what output to use when sending the data collected by the beat.
 
@@ -985,7 +985,7 @@ filebeat.inputs:
        filebeat_combined.output.elasticsearch %}
 #-------------------------- Elasticsearch output -------------------------------
 #
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/elasticsearch-output.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.2/elasticsearch-output.html
 #
 output.elasticsearch:
   
@@ -1151,7 +1151,7 @@ output.elasticsearch:
        filebeat_combined.output.logstash %}
 #----------------------------- Logstash output ---------------------------------
 #
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/logstash-output.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/logstash-output.html
 #
 output.logstash:
 
@@ -1295,7 +1295,7 @@ output.logstash:
    filebeat_combined.output.kafka %}
 #------------------------------- Kafka output ----------------------------------
 #
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/kafka-output.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/kafka-output.html
 #
 output.kafka:
 
@@ -1530,7 +1530,7 @@ output.kafka:
        filebeat_combined.output.redis %}
 #------------------------------- Redis output ----------------------------------
 #
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/redis-output.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/redis-output.html
 #
 #output.redis:
   # Boolean flag to enable or disable the output module.
@@ -1637,7 +1637,7 @@ output.kafka:
        filebeat_combined.output.file %}
 #------------------------------- File output -----------------------------------
 #
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/file-output.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/file-output.html
 #
 #output.file:
   # Boolean flag to enable or disable the output module.
@@ -1669,7 +1669,7 @@ output.kafka:
        filebeat_combined.output.console %}
 #----------------------------- Console output ---------------------------------
 #
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/console-output.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/console-output.html
 #
 #output.console:
   # Boolean flag to enable or disable the output module.
@@ -1715,7 +1715,7 @@ output.kafka:
    filebeat_combined.setup.dashboards %}
 #============================== Dashboards =====================================
 #
-# https://www.elastic.co/guide/en/beats/filebeat/6.3/configuration-dashboards.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.4/configuration-dashboards.html
 #
 # These settings control loading the sample dashboards to the Kibana index. Loading
 # the dashboards are disabled by default and can be enabled either by setting the
