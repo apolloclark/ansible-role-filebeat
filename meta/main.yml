@@ -2,6 +2,7 @@
 dependencies: []
 
 galaxy_info:
+  role_name: filebeat
   author: apolloclark
   description: Install and configure Elastic Filebeat
   company: "Apollo Clark"
