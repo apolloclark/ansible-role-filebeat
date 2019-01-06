@@ -8,7 +8,7 @@
 - name: Include defaults for configuration, per the requested version.
   include_vars:
     file: main-{{ version_simple }}.yml
-    
+
 # http://docs.ansible.com/ansible/latest/set_fact_module.html
 - name: Merge filebeat_default and filebeat variables
   set_fact:
@@ -120,7 +120,7 @@
 
 # http://docs.ansible.com/ansible/latest/service_module.html
 - name: Ensure that the service is running
-  service: 
+  service:
     name: filebeat
     state: started
     enabled: yes
