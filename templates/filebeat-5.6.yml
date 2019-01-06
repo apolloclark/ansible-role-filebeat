@@ -233,8 +233,6 @@ filebeat:
 
 
 
-
-
 ############################# Output ##########################################
 #
 # Configure what outputs to use when sending the data collected by the beat.
@@ -666,8 +664,6 @@ output.console:
   bulk_max_size: {{ filebeat_combined.output.console.bulk_max_size }}
   {% endif %}
 {% endif %}
-
-
 
 
 

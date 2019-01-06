@@ -881,7 +881,6 @@ filebeat.inputs:
 
 
 
-
 #================================ Processors ===================================
 
 # Processors are used to reduce the number of fields in the exported event or to
