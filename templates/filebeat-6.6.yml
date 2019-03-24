@@ -345,18 +345,32 @@ filebeat.modules:
        filebeat_combined.modules.osquery %}
 #------------------------------- Osquery Module ------------------------------
 # https://www.elastic.co/guide/en/beats/filebeat/6.6/filebeat-module-osquery.html
-#- module: osquery
-  #result:
-    #enabled: true
+- module: osquery
+  result:
+    {% if 'enabled' in filebeat_combined.modules.system.osquery %}
+    enabled: {{ filebeat_combined.modules.system.osquery.enabled }}
+    {% endif %}
 
-    # Set custom paths for the log files. If left empty,
-    # Filebeat will choose the paths depending on your OS.
-    #var.paths:
+    {% if 'var' in filebeat_combined.modules.system.osquery and
+           filebeat_combined.modules.system.osquery.var %}
+    var:
+      {% if 'paths' in filebeat_combined.modules.system.osquery.var and
+             filebeat_combined.modules.system.osquery.var.paths %}
+      # Set custom paths for the log files. If left empty,
+      # Filebeat will choose the paths depending on your OS.
+      paths:
+        {% for item in filebeat_combined.modules.system.osquery.var.paths %}
+        -{{ item }}
+        {% endfor %}
+      {% endif %}
 
-    # If true, all fields created by this module are prefixed with
-    # `osquery.result`. Set to false to copy the fields in the root
-    # of the document. The default is true.
-    #var.use_namespace: true
+      {% if 'use_namespace' in filebeat_combined.modules.system.osquery.var %}
+      # If true, all fields created by this module are prefixed with
+      # `osquery.result`. Set to false to copy the fields in the root
+      # of the document. The default is true.
+      use_namespace: {{ filebeat_combined.modules.system.osquery.var.use_namespace }}
+      {% endif %}
+    {% endif %}
 {% endif %}
 
 {% if 'postgresql' in filebeat_combined.modules and 
