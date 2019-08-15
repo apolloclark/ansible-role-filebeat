@@ -1,0 +1,256 @@
+---
+# https://www.elastic.co/guide/en/beats/filebeat/6.7/filebeat-getting-started.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.7/filebeat-configuration.html
+# https://www.elastic.co/guide/en/beats/filebeat/6.7/filebeat-configuration-details.html
+elastic_url: "https://artifacts.elastic.co"
+
+filebeat_defaults:
+  version: "6.7.0"
+  daemon: "filebeat"
+  config_include_dir: "/etc/filebeat/"
+  install_only: false
+  install_repo: true
+
+  # https://www.elastic.co/guide/en/beats/filebeat/6.7/configuration-filebeat-modules.html
+  modules:
+    system:
+      syslog:
+        enabled: true
+        var:
+          paths: []
+          convert_timezone: false
+        input: []
+      auth:
+        enabled: true
+        var:
+          paths: []
+          convert_timezone: false
+        input: []
+      apache2:
+        enabled: false
+        access:
+          var:
+            paths: []
+            convert_timezone: false
+          input: []
+        error:
+          var:
+            paths: []
+            convert_timezone: false
+          input: []
+      auditd:
+        enabled: false
+        var:
+          paths: []
+        input: []
+      icinga: []
+      iis: []
+      kafka: []
+      logstash:
+        enabled: false
+        var:
+          paths: []
+        slowlog:
+          enabled: true
+          var:
+            paths: []
+            format: "plain"
+      mongodb: []
+      mysql:
+        enabled: false
+        error:
+          var:
+            paths: []
+          input: []
+        slowlog:
+          var:
+            paths: []
+          input: []
+      nginx: []
+      osquery:
+        enabled: false
+        var:
+          paths: []
+          use_namespace: true
+      postgresql: []
+      redis: []
+      traefik: []
+      
+
+  # https://www.elastic.co/guide/en/beats/filebeat/6.7/configuration-filebeat-options.html
+  input: []
+
+  # https://www.elastic.co/guide/en/beats/filebeat/6.7/configuration-general-options.html#configuration-global-options
+  registry_file: "/var/lib/filebeat/registry"
+  registry_file_permissions: "0600"
+  overwrite_pipelines: false
+  shutdown_timeout: 0
+  config:
+    inputs:
+      enabled: false
+      path: "inputs.d/*.yml"
+      reload.enabled: true
+      reload.period: "10s"
+    modules:
+      enabled: false
+      path: "modules.d/*.yml"
+      reload.enabled: true
+      reload.period: "10s"
+      
+  # https://www.elastic.co/guide/en/beats/filebeat/6.7/configuration-general-options.html#configuration-general
+  name: ""
+  tags: []
+  fields: []
+  fields_under_root: false
+  queue: []
+  max_procs: ""
+  
+  # https://www.elastic.co/guide/en/beats/filebeat/6.7/defining-processors.html
+  processors: []
+
+  output:
+    # https://www.elastic.co/guide/en/beats/filebeat/6.7/elasticsearch-output.html
+    elasticsearch:
+      enabled: false
+      hosts:
+        - "127.0.0.1:9200"
+      compression_level: 0
+      worker: 1
+      protocol: "http" # "https"
+      username: "" # "elastic"
+      password: "" # "changeme"
+      parameters: []
+      index: "" # "filebeat-%{[beat.version]}-%{+yyyy.MM.dd}"
+      indices: []
+      pipeline: ""
+      pipelines: []
+      max_retires: 3
+      path: ""
+      headers: []
+      proxy_url: ""
+      bulk_max_size: 50
+      timeout: 90
+      ssl: []
+
+    # https://www.elastic.co/guide/en/beats/filebeat/6.7/logstash-output.html
+    logstash:
+      enabled: false
+      hosts:
+        - "localhost:5044"
+      worker: 1
+      compression_level: 3
+      ttl: "10s"
+      loadbalance: false
+      pipelining: 0
+      slow_start: false
+      backoff:
+        init: "1s"
+        max: "60s"
+      index: "filebeat"
+      proxy_url: ""
+      proxy_use_local_resolver: false
+      ssl: []
+
+    # https://www.elastic.co/guide/en/beats/filebeat/6.7/kafka-output.html
+    kafka:
+      enabled: false
+      hosts:
+        - "127.0.0.1:9092"
+      topic: "filebeat"
+      key: ''
+      partition:
+        hash:
+          reachable_only: false
+          hash: []
+      username: ''
+      password: ''
+      version: '0.10.0'
+      metadata:
+        retry:
+          max: 3
+          backoff: 250ms
+        refresh_frequency: 10m
+      worker: 1
+      max_retires: 3
+      bulk_max_size: 2048
+      timeout: "30s"
+      broker_timeout: "10s"
+      channel_buffer_size: 256
+      keep_alive: 0
+      compression: "gzip"
+      max_message_bytes: 1000000
+      required_acks: 1
+      client_id: "beats"
+      ssl: []
+      
+    redis: []
+
+    # https://www.elastic.co/guide/en/beats/filebeat/6.7/file-output.html
+    file:
+      enabled: false
+      path: "/tmp/filebeat"
+      filename: "filebeat"
+      rotate_every_kb: 10240
+      number_of_files: 7
+
+    # https://www.elastic.co/guide/en/beats/filebeat/6.7/console-output.html
+    console:
+      enabled: false
+      pretty: false
+      bulk_max_size: 2048
+
+  # https://www.elastic.co/guide/en/beats/filebeat/6.7/configuration-path.html
+  paths:
+    home: ""
+    config: ""
+    data: ""
+    logs: ""
+
+  setup:
+    # https://www.elastic.co/guide/en/beats/filebeat/6.7/configuration-dashboards.html
+    dashboards:
+      enabled: false
+      directory: '${path.home}/kibana'
+      url: ""
+      file: ""
+      beat: "filebeat"
+      kibana_index: ".kibana"
+      index: "filebeat-*"
+      always_kibana: true
+      retry.enabled: true
+
+    # https://www.elastic.co/guide/en/beats/filebeat/6.7/configuration-template.html
+    template:
+      enabled: false
+      name: "filebeat"
+      pattern: "filebeat-*"
+      fields: "${path.config}/fields.yml"
+      overwrite: false
+      settings: []
+
+    # https://www.elastic.co/guide/en/beats/filebeat/6.7/setup-kibana-endpoint.html
+    kibana:
+      host: "127.0.0.1:5601"
+      protocol: "http"
+      usernamee: ""
+      password: ""
+      path: ""
+      ssl: []
+
+  # https://www.elastic.co/guide/en/beats/filebeat/6.7/configuration-logging.html
+  logging:
+    level: "info"
+    selectors: '["*"]'
+    to_syslog: false
+    to_files: true
+    files:
+      path: "/var/log/filebeat/"
+      name: "filebeat"
+      rotateeverybytes: 10485760 # = 10MB
+      keepfiles: 7
+    metrics:
+      enabled: false
+      period: "30s"
+      
+  xpack: []
+  http: []
